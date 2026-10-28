@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
 
@@ -14,6 +16,7 @@ class Settings(BaseSettings):
     db_port: int = 5433
     jwt_secret: str
     jwt_expire_hours: int = 8
+    media_dir: Path = Path("../media")
 
     def _url(self, username: str, password: str) -> URL:
         return URL.create(
