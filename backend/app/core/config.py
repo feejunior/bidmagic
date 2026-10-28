@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     jwt_secret: str
     jwt_expire_hours: int = 8
     media_dir: Path = Path("../media")
+    audit_hmac_key: str
+    anti_sniping_extend_from_end: bool = False
 
     def _url(self, username: str, password: str) -> URL:
         return URL.create(
