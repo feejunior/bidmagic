@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     app_db_password: str
     db_host: str = "localhost"
     db_port: int = 5433
+    jwt_secret: str
+    jwt_expire_hours: int = 8
 
     def _url(self, username: str, password: str) -> URL:
         return URL.create(
