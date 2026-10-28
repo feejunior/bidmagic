@@ -5,8 +5,11 @@ from sqlalchemy import ColumnElement, Row, Select, and_, case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
+from app.core.config import settings
 from app.core.errors import AppError
 from app.models import Bid, Card, LedgerEntry, Lot, User
+from app.rules.audit import genesis_hash, lot_seal
+from app.rules.bidding import minimum_bid
 from app.schemas.lot import LotCreate
 from app.services.scryfall import get_or_create_card
 
@@ -35,12 +38,6 @@ def lot_status(lot: Lot, now: datetime) -> str:
     if now < lot.ends_at:
         return "live"
     return "closed"
-
-
-def minimum_bid(lot: Lot) -> int:
-    if lot.current_bid is None:
-        return lot.starting_bid
-    return lot.current_bid + lot.min_increment
 
 
 def validate_schedule(starts_at: datetime, ends_at: datetime, now: datetime) -> None:
@@ -177,6 +174,10 @@ async def create_lot(session: AsyncSession, user: User, data: LotCreate) -> int:
         bid_count=0,
     )
     session.add(lot)
+    await session.flush()
+
+    lot.last_hash = genesis_hash(settings.audit_hmac_key, lot.id)
+    lot.seal = lot_seal(settings.audit_hmac_key, lot.id, 0, lot.last_hash)
     await session.commit()
     return lot.id
 
