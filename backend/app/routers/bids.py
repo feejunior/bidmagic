@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request
 
 from app.core.deps import CurrentBidder, CurrentUser, SessionDep
 from app.core.rate_limit import limiter
+from app.core.rooms import rooms
 from app.schemas.bid import BidCreate, BidPlaced, MyBids
 from app.services import bids as bid_service
 
@@ -19,7 +20,9 @@ async def place_bid(
     user: CurrentUser,
     session: SessionDep,
 ) -> dict[str, Any]:
-    return await bid_service.place_bid(session, user, lot_id, data.amount)
+    result = await bid_service.place_bid(session, user, lot_id, data.amount)
+    await rooms.broadcast(lot_id, result)
+    return result
 
 
 @router.get("/my-bids", response_model=MyBids)

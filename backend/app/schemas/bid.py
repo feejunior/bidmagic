@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -10,6 +11,7 @@ class BidCreate(BaseModel):
 
 
 class BidPlaced(BaseModel):
+    type: Literal["bid_placed"]
     lot_id: int
     amount: int
     bidder_alias: str

@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import SessionLocal
+from app.core.rooms import rooms
 from app.models import LedgerEntry, Lot, Receipt, User
 from app.services.lots import utcnow
 
@@ -26,7 +27,12 @@ async def settle_lot(session: AsyncSession, lot_id: int) -> dict[str, Any] | Non
 
     if lot.leader_id is None:
         await session.commit()
-        return {"lot_id": lot.id, "winner_alias": None, "final_amount": None}
+        return {
+            "type": "lot_closed",
+            "lot_id": lot.id,
+            "winner_alias": None,
+            "final_amount": None,
+        }
 
     users = await session.scalars(
         select(User)
@@ -61,6 +67,7 @@ async def settle_lot(session: AsyncSession, lot_id: int) -> dict[str, Any] | Non
     )
     await session.commit()
     return {
+        "type": "lot_closed",
         "lot_id": lot.id,
         "winner_alias": winner.alias,
         "final_amount": lot.current_bid,
@@ -90,7 +97,10 @@ async def settle_due_lots() -> list[dict[str, Any]]:
 async def settlement_loop() -> None:
     while True:
         try:
-            await settle_due_lots()
+            for result in await settle_due_lots():
+                await rooms.broadcast(
+                    result["lot_id"], {**result, "server_now": utcnow()}
+                )
         except Exception:
             logger.exception("Settlement round failed")
         await asyncio.sleep(SETTLEMENT_INTERVAL_SECONDS)
