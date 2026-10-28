@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func, select
@@ -9,6 +10,29 @@ from app.rules.audit import bid_hash, genesis_hash, lot_seal
 from app.rules.bidding import calculate_new_end, minimum_bid, validate_bid
 from app.services.lots import lot_not_found, lot_query, to_summary, utcnow
 from app.services.wallet import get_available
+
+
+def append_bid(lot: Lot, bidder: User, amount: int, now: datetime) -> Bid:
+    key = settings.audit_hmac_key
+    prev_hash = lot.last_hash or genesis_hash(key, lot.id)
+    bid = Bid(
+        lot_id=lot.id,
+        bidder_id=bidder.id,
+        amount=amount,
+        created_at=now,
+        prev_hash=prev_hash,
+        hash=bid_hash(key, lot.id, bidder.id, amount, now, prev_hash),
+    )
+
+    lot.current_bid = amount
+    lot.leader_id = bidder.id
+    lot.bid_count += 1
+    lot.last_hash = bid.hash
+    lot.seal = lot_seal(key, lot.id, lot.bid_count, bid.hash)
+    lot.ends_at = calculate_new_end(
+        lot.ends_at, now, settings.anti_sniping_extend_from_end
+    )
+    return bid
 
 
 async def place_bid(
@@ -25,29 +49,11 @@ async def place_bid(
     now = utcnow()
     validate_bid(lot, bidder, amount, available, now)
 
-    key = settings.audit_hmac_key
-    prev_hash = lot.last_hash or genesis_hash(key, lot.id)
-    bid = Bid(
-        lot_id=lot.id,
-        bidder_id=bidder.id,
-        amount=amount,
-        created_at=now,
-        prev_hash=prev_hash,
-        hash=bid_hash(key, lot.id, bidder.id, amount, now, prev_hash),
-    )
-    session.add(bid)
-
-    lot.current_bid = amount
-    lot.leader_id = bidder.id
-    lot.bid_count += 1
-    lot.last_hash = bid.hash
-    lot.seal = lot_seal(key, lot.id, lot.bid_count, bid.hash)
-    lot.ends_at = calculate_new_end(
-        lot.ends_at, now, settings.anti_sniping_extend_from_end
-    )
+    session.add(append_bid(lot, bidder, amount, now))
     await session.commit()
 
     return {
+        "type": "bid_placed",
         "lot_id": lot.id,
         "amount": amount,
         "bidder_alias": bidder.alias,

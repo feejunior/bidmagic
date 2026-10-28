@@ -13,7 +13,7 @@ from app.core.config import settings
 from app.core.deps import SessionDep
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.rate_limit import limiter, rate_limit_handler
-from app.routers import audit, auth, bids, cards, lots, wallet
+from app.routers import audit, auth, bids, cards, lots, wallet, ws
 from app.services.settlement import settlement_loop
 
 
@@ -39,6 +39,7 @@ app.include_router(lots.router)
 app.include_router(bids.router)
 app.include_router(wallet.router)
 app.include_router(audit.router)
+app.include_router(ws.router)
 
 settings.media_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/media", StaticFiles(directory=settings.media_dir), name="media")
