@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-MAX_DEPOSIT = 100_000_000
+MAX_DEPOSIT = 10_000_000
 
 
 class DepositCreate(BaseModel):

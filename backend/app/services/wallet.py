@@ -28,6 +28,7 @@ async def get_available(session: AsyncSession, user_id: int) -> int:
 
 
 async def deposit(session: AsyncSession, user: User, amount: int) -> None:
+    await session.execute(select(User.id).where(User.id == user.id).with_for_update())
     session.add(LedgerEntry(user_id=user.id, type="deposit", amount=amount))
     await session.commit()
 
