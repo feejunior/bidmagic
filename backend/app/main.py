@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.core.deps import SessionDep
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.rate_limit import limiter, rate_limit_handler
-from app.routers import auth, cards, lots
+from app.routers import auth, bids, cards, lots, wallet
 
 app = FastAPI(title="BidMagic API")
 
@@ -20,6 +20,8 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 app.include_router(auth.router)
 app.include_router(cards.router)
 app.include_router(lots.router)
+app.include_router(bids.router)
+app.include_router(wallet.router)
 
 settings.media_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/media", StaticFiles(directory=settings.media_dir), name="media")
