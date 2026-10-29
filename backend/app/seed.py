@@ -31,7 +31,7 @@ LOTS = [
         "starting_bid": 50_000,
         "min_increment": 5_000,
         "starts_in": timedelta(hours=-1),
-        "duration": timedelta(hours=3),
+        "duration": timedelta(days=7),
         "bids": [("ana", 50_000), ("bruno", 60_000), ("ana", 70_000)],
     },
     {
@@ -40,7 +40,7 @@ LOTS = [
         "starting_bid": 1_000,
         "min_increment": 200,
         "starts_in": timedelta(minutes=-30),
-        "duration": timedelta(minutes=50),
+        "duration": timedelta(days=5),
         "bids": [("bruno", 1_000), ("ana", 1_400)],
     },
     {
@@ -49,7 +49,7 @@ LOTS = [
         "starting_bid": 3_000,
         "min_increment": 500,
         "starts_in": timedelta(minutes=-10),
-        "duration": timedelta(days=1),
+        "duration": timedelta(days=6),
         "bids": [],
     },
     {
@@ -57,8 +57,8 @@ LOTS = [
         "description": "Começa em breve.",
         "starting_bid": 800,
         "min_increment": 100,
-        "starts_in": timedelta(hours=1),
-        "duration": timedelta(hours=2),
+        "starts_in": timedelta(days=1),
+        "duration": timedelta(days=5),
         "bids": [],
     },
     {

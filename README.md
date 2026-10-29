@@ -354,7 +354,7 @@ Cada usuário recebe um **codinome aleatório fixo** (`Licitante #7F3A2B`). Sala
 
 - **"Encerrando..." por até ~2 segundos** depois que o cronômetro zera: é o intervalo do loop de liquidação. O lance já é recusado no instante exato do fim (validação no servidor); só o fechamento e o comprovante chegam um pouco depois.
 - **O fim do lote pode mudar** durante a disputa: é o anti-sniping. A sala mostra o aviso "Prorrogado..." com o horário original.
-- **Os lotes do seed dependem do horário em que o seed rodou.** Os lotes ao vivo duram de ~50 min a 1 dia; depois disso aparecem como encerrados. Para ter lotes ao vivo de novo, recrie o banco e rode o seed (ver [Recomeçar do zero](#recomeçar-do-zero)) ou crie lotes pelo painel.
+- **Os lotes do seed dependem do horário em que o seed rodou.** Os lotes ao vivo duram de 5 a 7 dias e o agendado começa 1 dia depois; passado esse prazo, aparecem como encerrados. Para ter lotes ao vivo de novo, recrie o banco e rode o seed (ver [Recomeçar do zero](#recomeçar-do-zero)) ou crie lotes pelo painel.
 - **A busca de cartas é em inglês** (os nomes no Scryfall são em inglês) e leva de 0,5 a 1 s, porque passa pelo nosso back-end até o Scryfall.
 - **A mesma carta pode aparecer com raridades diferentes:** a raridade é da impressão específica escolhida (o Lightning Bolt já foi comum, incomum e especial).
 - **Leiloeiro não deposita, não saca e não dá lance; licitante não cria lote.** O papel é escolhido no cadastro e não muda. Quem quiser os dois papéis cria duas contas.
