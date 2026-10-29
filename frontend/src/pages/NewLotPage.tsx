@@ -16,9 +16,6 @@ const DURATIONS = [
   { label: '7 dias', minutes: 10080 },
 ]
 
-const MIN_DURATION_MS = 5 * 60 * 1000
-const MAX_DURATION_MS = 30 * 24 * 60 * 60 * 1000
-
 function toLocalInput(date: Date) {
   const offset = date.getTimezoneOffset() * 60000
   return new Date(date.getTime() - offset).toISOString().slice(0, 16)
@@ -65,7 +62,7 @@ export function NewLotPage() {
         .finally(() => {
           if (active) setSearching(false)
         })
-    }, 400)
+    }, 300)
     return () => {
       active = false
       window.clearTimeout(id)
@@ -86,14 +83,9 @@ export function NewLotPage() {
       return
     }
 
-    const start = scheduled ? new Date(startsAt) : new Date()
-    const end = new Date(start.getTime() + duration * 60000)
+    const start = new Date(startsAt)
     if (scheduled && start.getTime() < Date.now() - 60000) {
       setError('O início não pode estar no passado.')
-      return
-    }
-    if (end.getTime() - start.getTime() < MIN_DURATION_MS || end.getTime() - start.getTime() > MAX_DURATION_MS) {
-      setError('A duração deve ser entre 5 minutos e 30 dias.')
       return
     }
 
@@ -107,7 +99,7 @@ export function NewLotPage() {
           starting_bid: starting,
           min_increment: increment,
           starts_at: scheduled ? start.toISOString() : null,
-          ends_at: end.toISOString(),
+          duration_minutes: duration,
         },
       })
       navigate(`/lotes/${lot.id}`)
@@ -154,11 +146,17 @@ export function NewLotPage() {
               autoFocus
             />
             {searchError && <div className="error-box">{searchError}</div>}
-            {searching && <p className="muted">Buscando no Scryfall...</p>}
+            {searching && results.length === 0 && (
+              <div className={styles.results}>
+                {Array.from({ length: 6 }, (_, index) => (
+                  <div key={index} className={styles.skeleton} />
+                ))}
+              </div>
+            )}
             {!searching && term.length >= 2 && results.length === 0 && !searchError && (
               <p className="muted">Nenhuma carta encontrada.</p>
             )}
-            <div className={styles.results}>
+            <div className={`${styles.results} ${searching ? styles.stale : ''}`}>
               {results.map((result) => (
                 <button
                   key={result.scryfall_id}
