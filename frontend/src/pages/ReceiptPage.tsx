@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { Receipt } from '../api/types'
+import { CopyLinkButton } from '../components/CopyLinkButton'
 import { formatBRL, formatDateTime } from '../lib/format'
 import { RARITY_LABELS } from '../lib/lots'
 import styles from './ReceiptPage.module.css'
@@ -86,6 +87,7 @@ export function ReceiptPage() {
       </article>
 
       <div className={styles.actions}>
+        <CopyLinkButton path={`/comprovante/${receipt.public_code}`} />
         <button type="button" className="button button-ghost" onClick={() => window.print()}>
           Imprimir
         </button>
