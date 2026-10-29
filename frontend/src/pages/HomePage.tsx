@@ -1,9 +1,9 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { LotList, LotSummary } from '../api/types'
 import { EndingSoon } from '../components/EndingSoon'
-import { CardIcon, CloseIcon, SearchIcon } from '../components/icons'
+import { CardIcon, ChevronIcon, CloseIcon, SearchIcon } from '../components/icons'
 import { LotCard } from '../components/LotCard'
 import { OPEN_SEARCH_EVENT } from '../components/SearchBox'
 import { formatBRL } from '../lib/format'
@@ -45,7 +45,8 @@ export function HomePage() {
   const [priceDraft, setPriceDraft] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const filterMenu = useRef<HTMLDivElement>(null)
   const { now, sync } = useServerClock()
 
   const filterKey = params.toString()
@@ -111,6 +112,22 @@ export function HomePage() {
     return () => window.clearTimeout(id)
   }, [priceDraft, ceiling, params, setParams])
 
+  useEffect(() => {
+    if (!filtersOpen) return
+    function handleClick(event: MouseEvent) {
+      if (!filterMenu.current?.contains(event.target as Node)) setFiltersOpen(false)
+    }
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') setFiltersOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [filtersOpen])
+
   function toggle(key: 'status' | 'rarity', value: string) {
     const current = params.getAll(key)
     const next = new URLSearchParams(params)
@@ -146,6 +163,7 @@ export function HomePage() {
   const priceMax = ceilingRounded(ceiling)
   const priceValue = priceDraft ?? (maxPrice ? Number(maxPrice) : priceMax)
   const hasFilters = statuses.length > 0 || rarities.length > 0 || !!query || !!maxPrice
+  const activeFilters = statuses.length + rarities.length + (maxPrice ? 1 : 0)
 
   const total = STATUSES.filter((item) => statuses.length === 0 || statuses.includes(item.value)).reduce(
     (sum, item) => sum + counts[item.value],
@@ -236,65 +254,52 @@ export function HomePage() {
       <h1 className="sr-only">Vitrine de leilões</h1>
       <EndingSoon lots={endingSoon} now={now} />
 
-      <div className={styles.mobileFilters}>
-        <div className={styles.chips} role="group" aria-label="Status">
-          {STATUSES.map((item) => (
+      <div className={styles.content}>
+        <div className={styles.toolbar}>
+          <div className={styles.summary}>
+            <span aria-live="polite">{loading ? 'Carregando...' : headline}</span>
+            {statuses.map((value) => (
+              <button key={value} type="button" className={styles.tag} onClick={() => remove('status', value)}>
+                {statusLabel(value)} <CloseIcon size={12} />
+                <span className="sr-only">remover filtro</span>
+              </button>
+            ))}
+            {rarities.map((value) => (
+              <button key={value} type="button" className={styles.tag} onClick={() => remove('rarity', value)}>
+                {RARITY_LABELS[value] ?? value} <CloseIcon size={12} />
+                <span className="sr-only">remover filtro</span>
+              </button>
+            ))}
+            {query && (
+              <button type="button" className={styles.tag} onClick={() => remove('q')}>
+                “{query}” <CloseIcon size={12} />
+                <span className="sr-only">remover busca</span>
+              </button>
+            )}
+            {maxPrice && (
+              <button type="button" className={styles.tag} onClick={() => remove('max_price')}>
+                até {formatBRL(Number(maxPrice))} <CloseIcon size={12} />
+                <span className="sr-only">remover filtro</span>
+              </button>
+            )}
+          </div>
+          <div className={styles.controls} ref={filterMenu}>
             <button
-              key={item.value}
               type="button"
-              aria-pressed={statuses.includes(item.value)}
-              className={`${styles.chip} ${statuses.includes(item.value) ? styles.chipOn : ''}`}
-              onClick={() => toggle('status', item.value)}
+              className={styles.filterButton}
+              aria-expanded={filtersOpen}
+              aria-controls="filter-panel"
+              onClick={() => setFiltersOpen((open) => !open)}
             >
-              {item.label} <span className="num">{counts[item.value]}</span>
+              Filtros
+              {activeFilters > 0 && <span className={styles.filterCount}>{activeFilters}</span>}
+              <ChevronIcon size={12} />
             </button>
-          ))}
-          <button
-            type="button"
-            aria-expanded={showFilters}
-            className={`${styles.chip} ${showFilters ? styles.chipOn : ''}`}
-            onClick={() => setShowFilters((open) => !open)}
-          >
-            Mais filtros
-          </button>
-        </div>
-        {showFilters && <div className={styles.mobilePanel}>{filters}</div>}
-      </div>
-
-      <div className={styles.layout}>
-        <aside className={styles.sidebar} aria-label="Filtros">
-          {filters}
-        </aside>
-
-        <div className={styles.content}>
-          <div className={styles.toolbar}>
-            <div className={styles.summary}>
-              <span aria-live="polite">{loading ? 'Carregando...' : headline}</span>
-              {statuses.map((value) => (
-                <button key={value} type="button" className={styles.tag} onClick={() => remove('status', value)}>
-                  {statusLabel(value)} <CloseIcon size={12} />
-                  <span className="sr-only">remover filtro</span>
-                </button>
-              ))}
-              {rarities.map((value) => (
-                <button key={value} type="button" className={styles.tag} onClick={() => remove('rarity', value)}>
-                  {RARITY_LABELS[value] ?? value} <CloseIcon size={12} />
-                  <span className="sr-only">remover filtro</span>
-                </button>
-              ))}
-              {query && (
-                <button type="button" className={styles.tag} onClick={() => remove('q')}>
-                  “{query}” <CloseIcon size={12} />
-                  <span className="sr-only">remover busca</span>
-                </button>
-              )}
-              {maxPrice && (
-                <button type="button" className={styles.tag} onClick={() => remove('max_price')}>
-                  até {formatBRL(Number(maxPrice))} <CloseIcon size={12} />
-                  <span className="sr-only">remover filtro</span>
-                </button>
-              )}
-            </div>
+            {filtersOpen && (
+              <div id="filter-panel" className={styles.filterPanel}>
+                {filters}
+              </div>
+            )}
             <label className={styles.sort}>
               <span>Ordenar:</span>
               <select value={sort} onChange={(event) => setSort(event.target.value)}>
@@ -306,35 +311,39 @@ export function HomePage() {
               </select>
             </label>
           </div>
-
-          {error && <div className="error-box" role="alert">{error}</div>}
-
-          {!loading && lots.length === 0 ? (
-            <div className={styles.empty}>
-              <CardIcon size={28} />
-              <p>Nenhum lote encontrado{query ? ` para “${query}”` : ''}.</p>
-              {hasFilters && (
-                <button type="button" className="button button-ghost" onClick={clearAll}>
-                  Limpar filtros
-                </button>
-              )}
-            </div>
-          ) : (
-            sections.map((section, index) => (
-              <section key={section.value} className={styles.section} aria-labelledby={`section-${section.value}`}>
-                <h2 id={`section-${section.value}`} className={styles.sectionTitle}>
-                  {section.label} <span className="muted num">({counts[section.value]})</span>
-                </h2>
-                <div className={styles.grid}>
-                  {section.lots.map((lot, position) => (
-                    <LotCard key={lot.id} lot={lot} now={now} priority={index === 0 && position < 4} />
-                  ))}
-                  {!loading && index === sections.length - 1 && prompt}
-                </div>
-              </section>
-            ))
-          )}
         </div>
+
+        {error && (
+          <div className="error-box" role="alert">
+            {error}
+          </div>
+        )}
+
+        {!loading && lots.length === 0 ? (
+          <div className={styles.empty}>
+            <CardIcon size={28} />
+            <p>Nenhum lote encontrado{query ? ` para “${query}”` : ''}.</p>
+            {hasFilters && (
+              <button type="button" className="button button-ghost" onClick={clearAll}>
+                Limpar filtros
+              </button>
+            )}
+          </div>
+        ) : (
+          sections.map((section, index) => (
+            <section key={section.value} className={styles.section} aria-labelledby={`section-${section.value}`}>
+              <h2 id={`section-${section.value}`} className={styles.sectionTitle}>
+                {section.label} <span className="muted num">({counts[section.value]})</span>
+              </h2>
+              <div className={styles.grid}>
+                {section.lots.map((lot, position) => (
+                  <LotCard key={lot.id} lot={lot} now={now} priority={index === 0 && position < 4} />
+                ))}
+                {!loading && index === sections.length - 1 && prompt}
+              </div>
+            </section>
+          ))
+        )}
       </div>
     </section>
   )
