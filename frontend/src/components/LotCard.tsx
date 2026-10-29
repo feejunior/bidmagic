@@ -7,6 +7,7 @@ import styles from './LotCard.module.css'
 export function LotCard({ lot, now, priority = false }: { lot: LotSummary; now: number; priority?: boolean }) {
   const status = currentStatus(lot.status, lot.starts_at, lot.ends_at, now)
   const remaining = Date.parse(lot.ends_at) - now
+  const unsold = status === 'closed' && lot.bid_count === 0
 
   let pill = 'Encerrado'
   let tone = styles.pillMuted
@@ -32,10 +33,12 @@ export function LotCard({ lot, now, priority = false }: { lot: LotSummary; now: 
       </div>
       <div className={styles.body}>
         <h3 className={styles.name}>{lot.card.name}</h3>
-        <strong className={`${styles.price} num`}>{formatBRL(lot.current_bid ?? lot.starting_bid)}</strong>
+        <strong className={`${styles.price} ${unsold ? styles.unsold : ''} num`}>
+          {formatBRL(lot.current_bid ?? lot.starting_bid)}
+        </strong>
         <span className={styles.meta}>
           {lot.bid_count === 0 ? 'Sem lances' : `${lot.bid_count} ${lot.bid_count === 1 ? 'lance' : 'lances'}`}
-          {status === 'closed' && lot.bid_count > 0 && ' · vendido'}
+          {status === 'closed' && (unsold ? ' · não vendido' : ' · vendido')}
         </span>
       </div>
     </Link>

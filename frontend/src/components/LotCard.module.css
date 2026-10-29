@@ -94,6 +94,10 @@
   font-size: 15px;
 }
 
+.unsold {
+  color: var(--text-muted);
+}
+
 .meta {
   font-size: 13px;
   color: var(--text-muted);

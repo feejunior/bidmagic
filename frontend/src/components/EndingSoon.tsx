@@ -5,8 +5,13 @@ import { formatRemaining, urgency } from '../lib/lots'
 import styles from './EndingSoon.module.css'
 import { FlameIcon } from './icons'
 
+const ENDING_SOON_MS = 60 * 60 * 1000
+
 export function EndingSoon({ lots, now }: { lots: LotSummary[]; now: number }) {
-  const live = lots.filter((lot) => Date.parse(lot.ends_at) > now)
+  const live = lots.filter((lot) => {
+    const remaining = Date.parse(lot.ends_at) - now
+    return remaining > 0 && remaining <= ENDING_SOON_MS
+  })
   if (live.length === 0) return null
 
   return (

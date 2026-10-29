@@ -22,7 +22,8 @@ import { useServerClock } from '../lib/useServerClock'
 import { NotFoundPage } from './NotFoundPage'
 import styles from './LotPage.module.css'
 
-const QUICK_STEPS = [5000, 10000, 25000]
+const QUICK_MULTIPLIERS = [1, 2, 5]
+const OFFLINE_NOTICE_MS = 2000
 
 export function LotRoute() {
   const { id } = useParams()
@@ -127,6 +128,15 @@ function LotPage({ lotId }: { lotId: number }) {
 
   const finished = lot?.status === 'closed' || lot?.status === 'cancelled'
   const connected = useLotSocket(notFound || finished ? null : lotId, handleEvent, loadLot)
+  const [offline, setOffline] = useState(false)
+  useEffect(() => {
+    if (connected) return
+    const id = window.setTimeout(() => setOffline(true), OFFLINE_NOTICE_MS)
+    return () => {
+      window.clearTimeout(id)
+      setOffline(false)
+    }
+  }, [connected])
 
   const isLeader = !!user && lot?.leader_alias === user.alias
   const wasLeader = useRef(false)
@@ -257,7 +267,7 @@ function LotPage({ lotId }: { lotId: number }) {
         <div className={styles.infoCol}>
           <div className={styles.header}>
             <StatusBadge status={status} />
-            {status === 'live' && !connected && (
+            {status === 'live' && offline && (
               <span className={styles.socketOff} role="status">
                 Reconectando...
               </span>
@@ -375,7 +385,7 @@ function LotPage({ lotId }: { lotId: number }) {
             {status === 'live' && (
               <form className={styles.bidForm} onSubmit={handleBid}>
                 <div className={styles.quick}>
-                  {QUICK_STEPS.map((step) => (
+                  {QUICK_MULTIPLIERS.map((multiplier) => multiplier * lot.min_increment).map((step) => (
                     <button
                       key={step}
                       type="button"
@@ -383,7 +393,7 @@ function LotPage({ lotId }: { lotId: number }) {
                       disabled={!canBid}
                       onClick={() => setAmount(centsToInput(Math.max(lot.minimum_bid, base + step)))}
                     >
-                      +{step / 100}
+                      +{(step / 100).toLocaleString('pt-BR')}
                     </button>
                   ))}
                 </div>
@@ -472,7 +482,7 @@ function LotPage({ lotId }: { lotId: number }) {
           </div>
           {!user ? (
             <Link to="/entrar" state={{ from: `/lotes/${lot.id}` }} className="button">
-              Entrar
+              Dar lance
             </Link>
           ) : (
             <button type="button" className="button" onClick={focusBid} disabled={!canBid}>
