@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
-import type { BidPlaced, LotDetail, LotEvent, Wallet } from '../api/types'
+import type { BidPlaced, LotDetail, LotEvent, MyBids, Wallet } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { HoloCard } from '../components/HoloCard'
 import { StatusBadge } from '../components/StatusBadge'
@@ -29,6 +29,7 @@ export function LotPage() {
   const [bidError, setBidError] = useState('')
   const [bidSuccess, setBidSuccess] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [receiptCode, setReceiptCode] = useState<string | null>(null)
 
   const isBidder = user?.role === 'bidder'
 
@@ -95,6 +96,14 @@ export function LotPage() {
   )
 
   const connected = useLotSocket(lotId, handleEvent, loadLot)
+
+  const wonLot = isBidder && lot?.status === 'closed' && lot.leader_alias === user?.alias
+  useEffect(() => {
+    if (!wonLot) return
+    api<MyBids>('/my-bids')
+      .then((data) => setReceiptCode(data.items.find((item) => item.lot.id === lotId)?.receipt_code ?? null))
+      .catch(() => setReceiptCode(null))
+  }, [wonLot, lotId])
 
   const minimum = lot?.minimum_bid ?? 0
   useEffect(() => {
@@ -233,13 +242,12 @@ export function LotPage() {
             {status === 'closed' && settled && lot.leader_alias && (
               <p className={styles.small}>
                 Arrematado por {lot.leader_alias} por {formatBRL(lot.current_bid ?? 0)}.
-                {isBidder && isLeader && (
-                  <>
-                    {' '}
-                    <Link to="/meus-lances">Ver comprovante em Meus lances</Link>
-                  </>
-                )}
               </p>
+            )}
+            {receiptCode && (
+              <Link to={`/comprovante/${receiptCode}`} className="button">
+                Ver comprovante
+              </Link>
             )}
 
             {status === 'live' && isBidder && (

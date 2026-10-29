@@ -83,7 +83,7 @@ export type Wallet = {
   available: number
   entries: {
     id: number
-    type: 'deposit' | 'purchase' | 'sale'
+    type: 'deposit' | 'withdrawal' | 'purchase' | 'sale'
     amount: number
     lot_id: number | null
     card_name: string | null

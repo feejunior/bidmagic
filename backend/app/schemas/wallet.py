@@ -10,9 +10,13 @@ class DepositCreate(BaseModel):
     amount: int = Field(gt=0, le=MAX_DEPOSIT)
 
 
+class WithdrawalCreate(BaseModel):
+    amount: int = Field(gt=0, le=MAX_DEPOSIT)
+
+
 class LedgerEntryOut(BaseModel):
     id: int
-    type: Literal["deposit", "purchase", "sale"]
+    type: Literal["deposit", "withdrawal", "purchase", "sale"]
     amount: int
     lot_id: int | None
     card_name: str | None

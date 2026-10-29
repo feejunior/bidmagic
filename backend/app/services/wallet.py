@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.errors import AppError
 from app.models import Card, LedgerEntry, Lot, User
 
 ENTRIES_LIMIT = 50
@@ -30,6 +31,16 @@ async def get_available(session: AsyncSession, user_id: int) -> int:
 async def deposit(session: AsyncSession, user: User, amount: int) -> None:
     await session.execute(select(User.id).where(User.id == user.id).with_for_update())
     session.add(LedgerEntry(user_id=user.id, type="deposit", amount=amount))
+    await session.commit()
+
+
+async def withdraw(session: AsyncSession, user: User, amount: int) -> None:
+    await session.execute(select(User.id).where(User.id == user.id).with_for_update())
+    if amount > await get_available(session, user.id):
+        raise AppError(
+            "INSUFFICIENT_FUNDS", "Saldo disponível insuficiente para este saque."
+        )
+    session.add(LedgerEntry(user_id=user.id, type="withdrawal", amount=-amount))
     await session.commit()
 
 
