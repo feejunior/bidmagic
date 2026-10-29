@@ -169,7 +169,6 @@ export function HomePage() {
     lots: lots.filter((lot) => currentStatus(lot.status, lot.starts_at, lot.ends_at, now) === item.value),
   })).filter((section) => section.lots.length > 0)
 
-
   const statusLabel = (value: string) => STATUSES.find((item) => item.value === value)?.label ?? value
 
   const filters = (
@@ -181,6 +180,7 @@ export function HomePage() {
             <input
               type="checkbox"
               checked={statuses.includes(item.value)}
+              disabled={counts[item.value] === 0 && !statuses.includes(item.value)}
               onChange={() => toggle('status', item.value)}
             />
             <span>
@@ -211,6 +211,7 @@ export function HomePage() {
             step={PRICE_STEP}
             value={Math.min(priceValue, priceMax)}
             aria-label="Preço máximo"
+            aria-valuetext={formatBRL(Math.min(priceValue, priceMax))}
             onChange={(event) => setPriceDraft(Number(event.target.value))}
             style={{ '--fill': `${(Math.min(priceValue, priceMax) / priceMax) * 100}%` } as CSSProperties}
           />
