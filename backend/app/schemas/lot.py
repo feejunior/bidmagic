@@ -59,10 +59,16 @@ class BidOut(BaseModel):
     created_at: datetime
 
 
+class RankingEntry(BaseModel):
+    bidder_alias: str
+    best_amount: int
+
+
 class LotDetail(LotSummary):
     description: str | None
     original_ends_at: datetime
     recent_bids: list[BidOut]
+    ranking: list[RankingEntry]
     server_now: datetime
 
 

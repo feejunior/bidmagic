@@ -140,6 +140,15 @@ async def get_lot_detail(session: AsyncSession, lot_id: int) -> dict[str, Any]:
         .limit(RECENT_BIDS_LIMIT)
     )
 
+    best_amount = func.max(Bid.amount)
+    ranking = await session.execute(
+        select(User.alias, best_amount)
+        .join(User, User.id == Bid.bidder_id)
+        .where(Bid.lot_id == lot_id)
+        .group_by(User.alias)
+        .order_by(best_amount.desc())
+    )
+
     now = utcnow()
     lot = row[0]
     return {
@@ -149,6 +158,9 @@ async def get_lot_detail(session: AsyncSession, lot_id: int) -> dict[str, Any]:
         "recent_bids": [
             {"bidder_alias": alias, "amount": amount, "created_at": created_at}
             for amount, created_at, alias in bids
+        ],
+        "ranking": [
+            {"bidder_alias": alias, "best_amount": amount} for alias, amount in ranking
         ],
         "server_now": now,
     }

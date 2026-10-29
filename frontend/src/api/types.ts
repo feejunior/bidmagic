@@ -47,6 +47,7 @@ export type LotDetail = LotSummary & {
   description: string | null
   original_ends_at: string
   recent_bids: Bid[]
+  ranking: { bidder_alias: string; best_amount: number }[]
   server_now: string
 }
 

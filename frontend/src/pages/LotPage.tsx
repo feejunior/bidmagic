@@ -75,6 +75,10 @@ export function LotPage() {
             { bidder_alias: event.bidder_alias, amount: event.amount, created_at: event.created_at },
             ...current.recent_bids,
           ].slice(0, 20),
+          ranking: [
+            { bidder_alias: event.bidder_alias, best_amount: event.amount },
+            ...current.ranking.filter((entry) => entry.bidder_alias !== event.bidder_alias),
+          ],
         }
       })
     },
@@ -156,7 +160,8 @@ export function LotPage() {
   const untilStart = Date.parse(lot.starts_at) - now
   const extended = Date.parse(lot.ends_at) !== Date.parse(lot.original_ends_at)
   const isLeader = !!user && lot.leader_alias === user.alias
-  const wasOutbid = !!user && !isLeader && lot.recent_bids.some((bid) => bid.bidder_alias === user.alias)
+  const position = user ? lot.ranking.findIndex((entry) => entry.bidder_alias === user.alias) + 1 : 0
+  const wasOutbid = !isLeader && position > 0
   const settled = lot.status === 'closed'
 
   return (
@@ -236,6 +241,12 @@ export function LotPage() {
             {isBidder && wasOutbid && (
               <p className={`${styles.youStatus} ${styles.outbid}`}>
                 {status === 'closed' ? 'Você não venceu este leilão.' : 'Você foi superado. Dê um novo lance!'}
+              </p>
+            )}
+            {isBidder && position > 0 && (
+              <p className={styles.small}>
+                Sua posição: <strong>{position}º</strong> de {lot.ranking.length}{' '}
+                {lot.ranking.length === 1 ? 'participante' : 'participantes'}
               </p>
             )}
 

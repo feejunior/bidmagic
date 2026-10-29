@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { MyBids } from '../api/types'
+import { CopyLinkButton } from '../components/CopyLinkButton'
 import { StatusBadge } from '../components/StatusBadge'
 import { formatBRL } from '../lib/format'
 import { currentStatus, formatRemaining } from '../lib/lots'
@@ -78,9 +79,12 @@ export function MyBidsPage() {
                 <div className={styles.outcome}>
                   <span className={`${styles.pill} ${tone}`}>{outcome}</span>
                   {receipt_code && (
-                    <Link to={`/comprovante/${receipt_code}`} className="button">
-                      Comprovante
-                    </Link>
+                    <div className={styles.receiptActions}>
+                      <Link to={`/comprovante/${receipt_code}`} className="button">
+                        Comprovante
+                      </Link>
+                      <CopyLinkButton path={`/comprovante/${receipt_code}`} />
+                    </div>
                   )}
                   {finished && is_leader && !receipt_code && <span className="muted">Gerando comprovante...</span>}
                 </div>
