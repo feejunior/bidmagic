@@ -233,6 +233,12 @@ export function LotPage() {
             {status === 'closed' && settled && lot.leader_alias && (
               <p className={styles.small}>
                 Arrematado por {lot.leader_alias} por {formatBRL(lot.current_bid ?? 0)}.
+                {isBidder && isLeader && (
+                  <>
+                    {' '}
+                    <Link to="/meus-lances">Ver comprovante em Meus lances</Link>
+                  </>
+                )}
               </p>
             )}
 
@@ -312,7 +318,10 @@ export function LotPage() {
           </dl>
 
           <div className={styles.history}>
-            <h2>Lances ({lot.bid_count})</h2>
+            <div className={styles.historyHeader}>
+              <h2>Lances ({lot.bid_count})</h2>
+              <Link to={`/auditoria/${lot.id}`}>Auditoria do histórico →</Link>
+            </div>
             {lot.recent_bids.length === 0 ? (
               <p className="muted">Ainda não há lances.</p>
             ) : (

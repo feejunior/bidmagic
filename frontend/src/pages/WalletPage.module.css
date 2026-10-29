@@ -1,0 +1,195 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 860px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 34px);
+  margin-bottom: 4px;
+}
+
+.page p {
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.balances {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px;
+}
+
+.balance {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.balance span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.balance strong {
+  font-size: 22px;
+}
+
+.balance small {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.main {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+.main strong {
+  font-size: 28px;
+  color: var(--accent);
+}
+
+.deposit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.deposit h2 {
+  font-size: 18px;
+}
+
+.quick {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.money {
+  position: relative;
+  flex: 1;
+}
+
+.money span {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.money input {
+  padding-left: 38px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.success {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  color: var(--success);
+  font-size: 14px;
+}
+
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.entries li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.entries li:last-child {
+  border-bottom: none;
+}
+
+.entries li div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lotLink {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.positive {
+  color: var(--success);
+}
+
+.negative {
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .balances {
+    grid-template-columns: 1fr;
+  }
+
+  .row {
+    flex-direction: column;
+  }
+
+  .entries li {
+    grid-template-columns: 1fr auto;
+  }
+
+  .date {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
