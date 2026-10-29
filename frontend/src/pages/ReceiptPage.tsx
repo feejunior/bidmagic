@@ -6,11 +6,13 @@ import { CopyLinkButton } from '../components/CopyLinkButton'
 import { formatBRL, formatDateTime } from '../lib/format'
 import { RARITY_LABELS } from '../lib/lots'
 import styles from './ReceiptPage.module.css'
+import { usePageTitle } from '../lib/usePageTitle'
 
 export function ReceiptPage() {
   const { code = '' } = useParams()
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [error, setError] = useState('')
+  usePageTitle(receipt ? `Comprovante · ${receipt.card.name}` : 'Comprovante')
 
   useEffect(() => {
     api<Receipt>(`/receipts/${encodeURIComponent(code)}`)

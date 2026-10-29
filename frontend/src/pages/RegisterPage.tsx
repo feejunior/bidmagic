@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import type { Role } from '../api/types'
 import { useAuth } from '../auth/useAuth'
+import { PasswordInput } from '../components/PasswordInput'
+import { usePageTitle } from '../lib/usePageTitle'
 import styles from './AuthForm.module.css'
 
 const ROLES: { value: Role; title: string; description: string }[] = [
@@ -11,6 +13,7 @@ const ROLES: { value: Role; title: string; description: string }[] = [
 ]
 
 export function RegisterPage() {
+  usePageTitle('Criar conta')
   const { register } = useAuth()
   const navigate = useNavigate()
   const [name, setName] = useState('')
@@ -38,12 +41,17 @@ export function RegisterPage() {
     <div className={styles.wrapper}>
       <div className={styles.card}>
         <h1 className={styles.title}>Criar conta</h1>
-        <p className={styles.subtitle}>O tipo de conta não pode ser alterado depois.</p>
+        <p className={styles.subtitle}>Escolha como você vai usar o BidMagic.</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           {error && <div className="error-box">{error}</div>}
 
-          <div className={styles.roles} role="radiogroup" aria-label="Tipo de conta">
+          <div
+            className={styles.roles}
+            role="radiogroup"
+            aria-label="Tipo de conta"
+            aria-describedby="role-warning"
+          >
             {ROLES.map((option) => (
               <button
                 key={option.value}
@@ -58,6 +66,11 @@ export function RegisterPage() {
               </button>
             ))}
           </div>
+
+          <p id="role-warning" className={styles.roleWarning}>
+            <strong>Atenção:</strong> o tipo de conta não pode ser alterado depois. Quem quiser comprar e vender cria
+            duas contas.
+          </p>
 
           <div className="field">
             <label htmlFor="name">Nome</label>
@@ -86,18 +99,17 @@ export function RegisterPage() {
           </div>
           <div className="field">
             <label htmlFor="password">Senha</label>
-            <input
+            <PasswordInput
               id="password"
-              className="input"
-              type="password"
               autoComplete="new-password"
               minLength={8}
               maxLength={128}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              aria-describedby="password-hint"
               required
             />
-            <span className="muted" style={{ fontSize: 12 }}>
+            <span id="password-hint" className="muted" style={{ fontSize: 12 }}>
               Mínimo de 8 caracteres.
             </span>
           </div>

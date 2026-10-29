@@ -5,6 +5,7 @@ import type { CardSearchResult, LotDetail } from '../api/types'
 import { formatBRL, parseBRL } from '../lib/format'
 import { RARITY_LABELS } from '../lib/lots'
 import styles from './NewLotPage.module.css'
+import { usePageTitle } from '../lib/usePageTitle'
 
 const DURATIONS = [
   { label: '5 min', minutes: 5 },
@@ -22,6 +23,7 @@ function toLocalInput(date: Date) {
 }
 
 export function NewLotPage() {
+  usePageTitle('Criar lote')
   const navigate = useNavigate()
 
   const [query, setQuery] = useState('')

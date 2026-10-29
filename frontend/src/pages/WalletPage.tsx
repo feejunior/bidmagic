@@ -4,6 +4,7 @@ import { api, ApiError } from '../api/client'
 import type { Wallet } from '../api/types'
 import { formatBRL, formatDateTime, parseBRL } from '../lib/format'
 import styles from './WalletPage.module.css'
+import { usePageTitle } from '../lib/usePageTitle'
 
 const QUICK_AMOUNTS = [5000, 10000, 50000, 100000]
 const MAX_DEPOSIT = 10_000_000
@@ -16,6 +17,7 @@ const ENTRY_LABELS = {
 }
 
 export function WalletPage() {
+  usePageTitle('Carteira')
   const [wallet, setWallet] = useState<Wallet | null>(null)
   const [amount, setAmount] = useState('')
   const [error, setError] = useState('')

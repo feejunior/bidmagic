@@ -8,8 +8,10 @@ import { formatBRL, formatDateTime } from '../lib/format'
 import { currentStatus, formatRemaining } from '../lib/lots'
 import { useServerClock } from '../lib/useServerClock'
 import styles from './PanelPage.module.css'
+import { usePageTitle } from '../lib/usePageTitle'
 
 export function PanelPage() {
+  usePageTitle('Meus lotes')
   const [data, setData] = useState<MyLots | null>(null)
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState<number | null>(null)
