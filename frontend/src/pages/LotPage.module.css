@@ -30,12 +30,6 @@
   top: 90px;
 }
 
-.image {
-  width: 100%;
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-}
-
 .infoCol {
   display: flex;
   flex-direction: column;
