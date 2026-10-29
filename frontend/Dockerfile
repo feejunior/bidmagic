@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM caddy:2.10-alpine
+FROM nginx:1.27-alpine
 
-COPY Caddyfile /etc/caddy/Caddyfile
-COPY --from=build /app/dist /srv/dist
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /app/dist /usr/share/nginx/html

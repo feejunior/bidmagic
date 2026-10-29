@@ -47,18 +47,27 @@ services:
     restart: unless-stopped
     environment:
       DOMAIN: ${DOMAIN}
+    command: ["/bin/sh", "-c", "while :; do sleep 6h; nginx -s reload; done & exec /docker-entrypoint.sh nginx -g 'daemon off;'"]
     ports:
       - "0.0.0.0:80:80"
       - "0.0.0.0:443:443"
     volumes:
       - media:/srv/media:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      - letsencrypt:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
     depends_on:
       - backend
+
+  certbot:
+    image: certbot/certbot:v3.0.1
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c", "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"]
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
 
 volumes:
   pgdata:
   media:
-  caddy_data:
-  caddy_config:
+  letsencrypt:
+  certbot_www:
