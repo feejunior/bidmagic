@@ -13,7 +13,7 @@
   position: relative;
   display: flex;
   justify-content: center;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -26,7 +26,6 @@
 
 .image {
   width: 100%;
-  max-width: 190px;
   aspect-ratio: 488 / 680;
   border-radius: 4.75% / 3.5%;
   object-fit: cover;
