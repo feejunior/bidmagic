@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, Field, StrictInt, field_validator
 
 LotStatus = Literal["scheduled", "live", "closed", "cancelled"]
 LotStatusFilter = Literal["scheduled", "live", "closed"]
@@ -16,10 +16,12 @@ MAX_DURATION_MINUTES = 30 * 24 * 60
 class LotCreate(BaseModel):
     scryfall_id: str = Field(max_length=64)
     description: str | None = Field(default=None, max_length=1000)
-    starting_bid: int = Field(gt=0, le=MAX_AMOUNT)
-    min_increment: int = Field(gt=0, le=MAX_AMOUNT)
+    starting_bid: StrictInt = Field(gt=0, le=MAX_AMOUNT)
+    min_increment: StrictInt = Field(gt=0, le=MAX_AMOUNT)
     starts_at: AwareDatetime | None = None
-    duration_minutes: int = Field(ge=MIN_DURATION_MINUTES, le=MAX_DURATION_MINUTES)
+    duration_minutes: StrictInt = Field(
+        ge=MIN_DURATION_MINUTES, le=MAX_DURATION_MINUTES
+    )
 
     @field_validator("description")
     @classmethod

@@ -13,9 +13,8 @@ from app.rules.bidding import minimum_bid
 from app.schemas.lot import LotCreate
 from app.services.scryfall import get_or_create_card
 
-MIN_DURATION = timedelta(minutes=5)
-MAX_DURATION = timedelta(days=30)
 START_TOLERANCE = timedelta(minutes=1)
+MAX_START_AHEAD = timedelta(days=365)
 RECENT_BIDS_LIMIT = 20
 
 Auctioneer = aliased(User)
@@ -40,13 +39,11 @@ def lot_status(lot: Lot, now: datetime) -> str:
     return "closed"
 
 
-def validate_schedule(starts_at: datetime, ends_at: datetime, now: datetime) -> None:
+def validate_start(starts_at: datetime, now: datetime) -> None:
     if starts_at < now - START_TOLERANCE:
         raise AppError("START_IN_PAST", "O início do lote não pode estar no passado.")
-    if not MIN_DURATION <= ends_at - starts_at <= MAX_DURATION:
-        raise AppError(
-            "INVALID_DURATION", "A duração do lote deve ser entre 5 minutos e 30 dias."
-        )
+    if starts_at > now + MAX_START_AHEAD:
+        raise AppError("START_TOO_FAR", "O início do lote deve ser em até 1 ano.")
 
 
 def status_filter(status: str, now: datetime) -> ColumnElement[bool]:
@@ -225,8 +222,8 @@ async def get_lot_detail(session: AsyncSession, lot_id: int) -> dict[str, Any]:
 async def create_lot(session: AsyncSession, user: User, data: LotCreate) -> int:
     now = utcnow()
     starts_at = (data.starts_at or now).astimezone(UTC)
+    validate_start(starts_at, now)
     ends_at = starts_at + timedelta(minutes=data.duration_minutes)
-    validate_schedule(starts_at, ends_at, now)
 
     card = await get_or_create_card(session, data.scryfall_id)
     lot = Lot(

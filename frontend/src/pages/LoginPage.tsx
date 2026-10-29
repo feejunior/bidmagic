@@ -37,7 +37,7 @@ export function LoginPage() {
         <p className={styles.subtitle}>Acesse sua conta para dar lances ou leiloar.</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          {error && <div className="error-box">{error}</div>}
+          {error && <div className="error-box" role="alert">{error}</div>}
           <div className="field">
             <label htmlFor="email">E-mail</label>
             <input

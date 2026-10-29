@@ -1,17 +1,17 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictInt
 
 MAX_DEPOSIT = 10_000_000
 
 
 class DepositCreate(BaseModel):
-    amount: int = Field(gt=0, le=MAX_DEPOSIT)
+    amount: StrictInt = Field(gt=0, le=MAX_DEPOSIT)
 
 
 class WithdrawalCreate(BaseModel):
-    amount: int = Field(gt=0, le=MAX_DEPOSIT)
+    amount: StrictInt = Field(gt=0, le=MAX_DEPOSIT)
 
 
 class LedgerEntryOut(BaseModel):

@@ -32,7 +32,7 @@ export function MyBidsPage() {
   }, [load])
 
   if (!data) {
-    return error ? <div className="error-box">{error}</div> : <p className="muted">Carregando...</p>
+    return error ? <div className="error-box" role="alert">{error}</div> : <p className="muted">Carregando...</p>
   }
 
   return (

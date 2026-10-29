@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Cookie, Depends
+from fastapi import Cookie, Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
@@ -9,7 +9,9 @@ from app.core.security import decode_access_token
 from app.models import User
 
 ACCESS_COOKIE = "access_token"
+MAX_DB_ID = 2_147_483_647
 
+LotId = Annotated[int, Path(ge=1, le=MAX_DB_ID)]
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 

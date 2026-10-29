@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { RequireRole } from './components/RequireRole'
 import { HomePage } from './pages/HomePage'
-import { LotPage } from './pages/LotPage'
+import { LotRoute } from './pages/LotPage'
 
 const AuditPage = lazy(() => import('./pages/AuditPage').then((module) => ({ default: module.AuditPage })))
 const HowItWorksPage = lazy(() =>
@@ -23,7 +23,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
-        <Route path="lotes/:id" element={<LotPage />} />
+        <Route path="lotes/:id" element={<LotRoute />} />
         <Route path="como-funciona" element={<HowItWorksPage />} />
         <Route
           path="painel"

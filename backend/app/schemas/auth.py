@@ -1,18 +1,22 @@
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    StringConstraints,
+    field_validator,
+)
 
 
 class RegisterRequest(BaseModel):
-    name: str = Field(min_length=2, max_length=100)
+    name: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)
+    ]
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     role: Literal["auctioneer", "bidder"]
-
-    @field_validator("name")
-    @classmethod
-    def strip_name(cls, value: str) -> str:
-        return value.strip()
 
     @field_validator("email")
     @classmethod

@@ -415,7 +415,7 @@
 
 @media (max-width: 760px) {
   .page {
-    padding-bottom: 76px;
+    padding-bottom: 110px;
   }
 
   .layout {
@@ -482,6 +482,16 @@
 
   .barTime {
     font-size: 17px;
+  }
+
+  .barStatus {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
   }
 }
 

@@ -5,9 +5,9 @@ import type { LotList, LotSummary } from '../api/types'
 import { EndingSoon } from '../components/EndingSoon'
 import { CardIcon, CloseIcon, SearchIcon } from '../components/icons'
 import { LotCard } from '../components/LotCard'
-import { SEARCH_INPUT_ID } from '../components/SearchBox'
+import { OPEN_SEARCH_EVENT } from '../components/SearchBox'
 import { formatBRL } from '../lib/format'
-import { RARITY_LABELS } from '../lib/lots'
+import { currentStatus, RARITY_LABELS } from '../lib/lots'
 import { usePageTitle } from '../lib/usePageTitle'
 import { useServerClock } from '../lib/useServerClock'
 import styles from './HomePage.module.css'
@@ -147,12 +147,31 @@ export function HomePage() {
   const priceValue = priceDraft ?? (maxPrice ? Number(maxPrice) : priceMax)
   const hasFilters = statuses.length > 0 || rarities.length > 0 || !!query || !!maxPrice
 
-  const headline =
-    statuses.length === 1
-      ? `${lots.length} ${lots.length === 1 ? 'leilão' : 'leilões'} ${
-          { live: 'ao vivo', scheduled: 'agendados', closed: 'encerrados' }[statuses[0] as 'live']
-        }`
-      : `${lots.length} ${lots.length === 1 ? 'lote' : 'lotes'}`
+  const total = STATUSES.filter((item) => statuses.length === 0 || statuses.includes(item.value)).reduce(
+    (sum, item) => sum + counts[item.value],
+    0,
+  )
+  const headline = `${total} ${total === 1 ? 'lote' : 'lotes'}`
+
+  const sections = STATUSES.map((item) => ({
+    ...item,
+    lots: lots.filter((lot) => currentStatus(lot.status, lot.starts_at, lot.ends_at, now) === item.value),
+  })).filter((section) => section.lots.length > 0)
+
+  const prompt = (
+    <button
+      type="button"
+      className={styles.prompt}
+      onClick={() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))
+      }}
+    >
+      <SearchIcon size={22} />
+      <strong>Procurando uma carta?</strong>
+      <span>Busque pelo nome</span>
+    </button>
+  )
 
   const statusLabel = (value: string) => STATUSES.find((item) => item.value === value)?.label ?? value
 
@@ -288,7 +307,7 @@ export function HomePage() {
             </label>
           </div>
 
-          {error && <div className="error-box">{error}</div>}
+          {error && <div className="error-box" role="alert">{error}</div>}
 
           {!loading && lots.length === 0 ? (
             <div className={styles.empty}>
@@ -301,25 +320,19 @@ export function HomePage() {
               )}
             </div>
           ) : (
-            <div className={styles.grid}>
-              {lots.map((lot, index) => (
-                <LotCard key={lot.id} lot={lot} now={now} priority={index < 4} />
-              ))}
-              {!loading && (
-                <button
-                  type="button"
-                  className={styles.prompt}
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                    document.getElementById(SEARCH_INPUT_ID)?.focus()
-                  }}
-                >
-                  <SearchIcon size={22} />
-                  <strong>Procurando uma carta?</strong>
-                  <span>Busque pelo nome</span>
-                </button>
-              )}
-            </div>
+            sections.map((section, index) => (
+              <section key={section.value} className={styles.section} aria-labelledby={`section-${section.value}`}>
+                <h2 id={`section-${section.value}`} className={styles.sectionTitle}>
+                  {section.label} <span className="muted num">({counts[section.value]})</span>
+                </h2>
+                <div className={styles.grid}>
+                  {section.lots.map((lot, position) => (
+                    <LotCard key={lot.id} lot={lot} now={now} priority={index === 0 && position < 4} />
+                  ))}
+                  {!loading && index === sections.length - 1 && prompt}
+                </div>
+              </section>
+            ))
           )}
         </div>
       </div>
