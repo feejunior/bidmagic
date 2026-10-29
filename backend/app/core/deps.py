@@ -13,12 +13,18 @@ ACCESS_COOKIE = "access_token"
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 
-async def get_current_user(
+async def get_optional_user(
     session: SessionDep,
     access_token: Annotated[str | None, Cookie()] = None,
-) -> User:
+) -> User | None:
     user_id = decode_access_token(access_token) if access_token else None
-    user = await session.get(User, user_id) if user_id else None
+    return await session.get(User, user_id) if user_id else None
+
+
+OptionalUser = Annotated[User | None, Depends(get_optional_user)]
+
+
+async def get_current_user(user: OptionalUser) -> User:
     if user is None:
         raise AppError("NOT_AUTHENTICATED", "Faça login para continuar.", 401)
     return user
