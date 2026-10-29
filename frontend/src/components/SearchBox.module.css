@@ -1,19 +1,58 @@
 .box {
   position: relative;
+  width: 100%;
 }
 
 .icon {
   position: absolute;
-  left: 13px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
-  font-size: 17px;
   pointer-events: none;
 }
 
 .input {
-  padding-left: 38px;
+  width: 100%;
+  height: 38px;
+  padding: 0 40px 0 36px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  outline: none;
+  font-size: 14px;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.kbd {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: 20px;
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  pointer-events: none;
+}
+
+.input:focus ~ .kbd {
+  display: none;
 }
 
 .list {
@@ -21,7 +60,7 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  z-index: 20;
+  z-index: 30;
   margin: 0;
   padding: 6px;
   list-style: none;
@@ -29,17 +68,17 @@
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow);
-  max-height: 380px;
+  max-height: 420px;
   overflow-y: auto;
 }
 
 .item {
   display: grid;
-  grid-template-columns: 36px 1fr auto;
+  grid-template-columns: 32px 1fr auto;
   gap: 12px;
   align-items: center;
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
@@ -48,7 +87,7 @@
 }
 
 .thumb {
-  width: 36px;
+  width: 32px;
   aspect-ratio: 488 / 680;
   border-radius: 3px;
   object-fit: cover;
@@ -67,6 +106,11 @@
   white-space: nowrap;
 }
 
+.text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .text span {
   font-size: 12px;
   color: var(--text-muted);
@@ -75,11 +119,30 @@
 .price {
   font-weight: 700;
   color: var(--accent);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .empty {
-  padding: 12px;
+  padding: 10px;
   color: var(--text-muted);
   font-size: 14px;
+}
+
+.all {
+  margin-top: 4px;
+  padding: 9px 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.all kbd {
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-muted);
 }

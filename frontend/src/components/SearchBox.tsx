@@ -1,26 +1,46 @@
-import { useEffect, useId, useState, type KeyboardEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import type { LotList, LotSummary } from '../api/types'
 import { formatBRL } from '../lib/format'
 import { STATUS_LABELS } from '../lib/lots'
+import { SearchIcon } from './icons'
 import styles from './SearchBox.module.css'
 
 const SUGGESTION_LIMIT = 6
 const DEBOUNCE_MS = 200
 
-type Props = {
-  value: string
-  onChange: (value: string) => void
-}
+export const SEARCH_INPUT_ID = 'site-search'
 
-export function SearchBox({ value, onChange }: Props) {
+export function SearchBox({ onDone }: { onDone?: () => void }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const listId = useId()
+  const input = useRef<HTMLInputElement>(null)
+  const [value, setValue] = useState('')
   const [suggestions, setSuggestions] = useState<LotSummary[]>([])
   const [open, setOpen] = useState(false)
   const [highlighted, setHighlighted] = useState(-1)
   const term = value.trim()
+
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setValue(new URLSearchParams(location.search).get('q') ?? '')
+    }
+  }, [location.pathname, location.search])
+
+  useEffect(() => {
+    function handleShortcut(event: globalThis.KeyboardEvent) {
+      const target = event.target as HTMLElement
+      const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+      if (event.key === '/' && !typing) {
+        event.preventDefault()
+        input.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [])
 
   useEffect(() => {
     if (term.length < 2) {
@@ -47,9 +67,23 @@ export function SearchBox({ value, onChange }: Props) {
     }
   }, [term])
 
-  function goTo(lot: LotSummary) {
+  function finish() {
     setOpen(false)
+    input.current?.blur()
+    onDone?.()
+  }
+
+  function goToLot(lot: LotSummary) {
+    finish()
     navigate(`/lotes/${lot.id}`)
+  }
+
+  function searchShowcase() {
+    const params = new URLSearchParams(location.pathname === '/' ? location.search : '')
+    if (term) params.set('q', term)
+    else params.delete('q')
+    finish()
+    navigate({ pathname: '/', search: params.toString() })
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -60,9 +94,10 @@ export function SearchBox({ value, onChange }: Props) {
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
       setHighlighted((index) => Math.max(index - 1, -1))
-    } else if (event.key === 'Enter' && highlighted >= 0 && suggestions[highlighted]) {
+    } else if (event.key === 'Enter') {
       event.preventDefault()
-      goTo(suggestions[highlighted])
+      if (highlighted >= 0 && suggestions[highlighted]) goToLot(suggestions[highlighted])
+      else searchShowcase()
     } else if (event.key === 'Escape') {
       setOpen(false)
     }
@@ -72,14 +107,14 @@ export function SearchBox({ value, onChange }: Props) {
 
   return (
     <div className={styles.box}>
-      <span className={styles.icon} aria-hidden="true">
-        ⌕
-      </span>
+      <SearchIcon className={styles.icon} />
       <input
-        className={`input ${styles.input}`}
+        ref={input}
+        id={SEARCH_INPUT_ID}
+        className={styles.input}
         type="search"
-        placeholder="Buscar carta pelo nome"
-        aria-label="Buscar carta pelo nome"
+        placeholder="Buscar carta ou coleção"
+        aria-label="Buscar carta ou coleção"
         role="combobox"
         aria-expanded={showList}
         aria-controls={listId}
@@ -87,13 +122,16 @@ export function SearchBox({ value, onChange }: Props) {
         maxLength={100}
         value={value}
         onChange={(event) => {
-          onChange(event.target.value)
+          setValue(event.target.value)
           setOpen(true)
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         onKeyDown={handleKeyDown}
       />
+      <kbd className={styles.kbd} aria-hidden="true">
+        /
+      </kbd>
 
       {showList && (
         <ul id={listId} role="listbox" className={styles.list}>
@@ -108,7 +146,7 @@ export function SearchBox({ value, onChange }: Props) {
                 className={`${styles.item} ${index === highlighted ? styles.highlighted : ''}`}
                 onMouseDown={(event) => event.preventDefault()}
                 onMouseEnter={() => setHighlighted(index)}
-                onClick={() => goTo(lot)}
+                onClick={() => goToLot(lot)}
               >
                 <img src={lot.card.image_url} alt="" className={styles.thumb} />
                 <div className={styles.text}>
@@ -117,10 +155,17 @@ export function SearchBox({ value, onChange }: Props) {
                     {lot.card.set_name} · {STATUS_LABELS[lot.status]}
                   </span>
                 </div>
-                <span className={styles.price}>{formatBRL(lot.current_bid ?? lot.starting_bid)}</span>
+                <span className={`${styles.price} num`}>{formatBRL(lot.current_bid ?? lot.starting_bid)}</span>
               </li>
             ))
           )}
+          <li
+            className={styles.all}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={searchShowcase}
+          >
+            Ver todos os resultados para “{term}” <kbd>Enter</kbd>
+          </li>
         </ul>
       )}
     </div>

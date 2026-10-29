@@ -1,17 +1,22 @@
+import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { RequireRole } from './components/RequireRole'
-import { AuditPage } from './pages/AuditPage'
 import { HomePage } from './pages/HomePage'
-import { LoginPage } from './pages/LoginPage'
 import { LotPage } from './pages/LotPage'
-import { MyBidsPage } from './pages/MyBidsPage'
-import { NewLotPage } from './pages/NewLotPage'
-import { NotFoundPage } from './pages/NotFoundPage'
-import { PanelPage } from './pages/PanelPage'
-import { ReceiptPage } from './pages/ReceiptPage'
-import { RegisterPage } from './pages/RegisterPage'
-import { WalletPage } from './pages/WalletPage'
+
+const AuditPage = lazy(() => import('./pages/AuditPage').then((module) => ({ default: module.AuditPage })))
+const HowItWorksPage = lazy(() =>
+  import('./pages/HowItWorksPage').then((module) => ({ default: module.HowItWorksPage })),
+)
+const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })))
+const MyBidsPage = lazy(() => import('./pages/MyBidsPage').then((module) => ({ default: module.MyBidsPage })))
+const NewLotPage = lazy(() => import('./pages/NewLotPage').then((module) => ({ default: module.NewLotPage })))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })))
+const PanelPage = lazy(() => import('./pages/PanelPage').then((module) => ({ default: module.PanelPage })))
+const ReceiptPage = lazy(() => import('./pages/ReceiptPage').then((module) => ({ default: module.ReceiptPage })))
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then((module) => ({ default: module.RegisterPage })))
+const WalletPage = lazy(() => import('./pages/WalletPage').then((module) => ({ default: module.WalletPage })))
 
 export default function App() {
   return (
@@ -19,6 +24,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="lotes/:id" element={<LotPage />} />
+        <Route path="como-funciona" element={<HowItWorksPage />} />
         <Route
           path="painel"
           element={
