@@ -36,6 +36,30 @@
   gap: 12px;
 }
 
+.stale {
+  opacity: 0.55;
+}
+
+.skeleton {
+  aspect-ratio: 488 / 680;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
 .result {
   display: flex;
   flex-direction: column;

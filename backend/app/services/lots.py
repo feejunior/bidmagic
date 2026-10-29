@@ -157,7 +157,7 @@ async def get_lot_detail(session: AsyncSession, lot_id: int) -> dict[str, Any]:
 async def create_lot(session: AsyncSession, user: User, data: LotCreate) -> int:
     now = utcnow()
     starts_at = (data.starts_at or now).astimezone(UTC)
-    ends_at = data.ends_at.astimezone(UTC)
+    ends_at = starts_at + timedelta(minutes=data.duration_minutes)
     validate_schedule(starts_at, ends_at, now)
 
     card = await get_or_create_card(session, data.scryfall_id)

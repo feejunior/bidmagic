@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { LotSummary, MyLots } from '../api/types'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { StatusBadge } from '../components/StatusBadge'
 import { formatBRL, formatDateTime } from '../lib/format'
 import { currentStatus, formatRemaining } from '../lib/lots'
@@ -12,6 +13,7 @@ export function PanelPage() {
   const [data, setData] = useState<MyLots | null>(null)
   const [error, setError] = useState('')
   const [cancelling, setCancelling] = useState<number | null>(null)
+  const [toCancel, setToCancel] = useState<LotSummary | null>(null)
   const { now, sync } = useServerClock()
 
   const load = useCallback(() => {
@@ -30,14 +32,15 @@ export function PanelPage() {
   }, [load])
 
   async function handleCancel(lot: LotSummary) {
-    if (!window.confirm(`Cancelar o lote de ${lot.card.name}? Essa ação não pode ser desfeita.`)) return
     setError('')
     setCancelling(lot.id)
     try {
       await api<void>(`/lots/${lot.id}/cancel`, { method: 'POST' })
+      setToCancel(null)
       load()
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Não foi possível cancelar o lote.')
+      setToCancel(null)
     } finally {
       setCancelling(null)
     }
@@ -128,10 +131,9 @@ export function PanelPage() {
                     <button
                       type="button"
                       className="button button-ghost"
-                      disabled={cancelling === lot.id}
-                      onClick={() => handleCancel(lot)}
+                      onClick={() => setToCancel(lot)}
                     >
-                      {cancelling === lot.id ? 'Cancelando...' : 'Cancelar'}
+                      Cancelar lote
                     </button>
                   )}
                 </div>
@@ -140,6 +142,20 @@ export function PanelPage() {
           })}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={toCancel !== null}
+        title="Cancelar este lote?"
+        message={
+          toCancel
+            ? `O lote de ${toCancel.card.name} sai da vitrine e não pode ser reaberto. Se quiser, crie um novo depois.`
+            : ''
+        }
+        confirmLabel="Sim, cancelar lote"
+        busy={cancelling !== null}
+        onConfirm={() => toCancel && handleCancel(toCancel)}
+        onClose={() => setToCancel(null)}
+      />
     </section>
   )
 }

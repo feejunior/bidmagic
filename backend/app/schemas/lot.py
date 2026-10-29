@@ -8,6 +8,8 @@ LotStatusFilter = Literal["scheduled", "live", "closed"]
 Rarity = Literal["common", "uncommon", "rare", "mythic", "special", "bonus"]
 
 MAX_AMOUNT = 1_000_000_000
+MIN_DURATION_MINUTES = 5
+MAX_DURATION_MINUTES = 30 * 24 * 60
 
 
 class LotCreate(BaseModel):
@@ -16,7 +18,7 @@ class LotCreate(BaseModel):
     starting_bid: int = Field(gt=0, le=MAX_AMOUNT)
     min_increment: int = Field(gt=0, le=MAX_AMOUNT)
     starts_at: AwareDatetime | None = None
-    ends_at: AwareDatetime
+    duration_minutes: int = Field(ge=MIN_DURATION_MINUTES, le=MAX_DURATION_MINUTES)
 
     @field_validator("description")
     @classmethod
