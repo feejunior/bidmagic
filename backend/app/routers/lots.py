@@ -2,7 +2,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Query, Request
 
-from app.core.deps import CurrentAuctioneer, SessionDep
+from app.core.deps import MAX_DB_ID, CurrentAuctioneer, LotId, SessionDep
 from app.core.rate_limit import limiter
 from app.schemas.lot import (
     MAX_AMOUNT,
@@ -29,7 +29,7 @@ async def list_lots(
     max_price: Annotated[int | None, Query(ge=0, le=MAX_AMOUNT)] = None,
     sort: LotSort = "ending",
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
-    offset: Annotated[int, Query(ge=0)] = 0,
+    offset: Annotated[int, Query(ge=0, le=MAX_DB_ID)] = 0,
 ) -> dict[str, Any]:
     query = q.strip() if q else None
     return await lot_service.list_lots(
@@ -46,7 +46,7 @@ async def list_lots(
 
 
 @router.get("/lots/{lot_id}", response_model=LotDetail)
-async def get_lot(lot_id: int, session: SessionDep) -> dict[str, Any]:
+async def get_lot(lot_id: LotId, session: SessionDep) -> dict[str, Any]:
     return await lot_service.get_lot_detail(session, lot_id)
 
 
@@ -60,7 +60,9 @@ async def create_lot(
 
 
 @router.post("/lots/{lot_id}/cancel", status_code=204)
-async def cancel_lot(lot_id: int, user: CurrentAuctioneer, session: SessionDep) -> None:
+async def cancel_lot(
+    lot_id: LotId, user: CurrentAuctioneer, session: SessionDep
+) -> None:
     await lot_service.cancel_lot(session, user, lot_id)
 
 

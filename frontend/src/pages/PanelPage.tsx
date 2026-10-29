@@ -49,7 +49,7 @@ export function PanelPage() {
   }
 
   if (!data) {
-    return error ? <div className="error-box">{error}</div> : <p className="muted">Carregando...</p>
+    return error ? <div className="error-box" role="alert">{error}</div> : <p className="muted">Carregando...</p>
   }
 
   const counts = { live: 0, scheduled: 0, closed: 0, cancelled: 0 }
@@ -88,7 +88,7 @@ export function PanelPage() {
         </div>
       </div>
 
-      {error && <div className="error-box">{error}</div>}
+      {error && <div className="error-box" role="alert">{error}</div>}
 
       {data.lots.length === 0 ? (
         <div className={styles.empty}>

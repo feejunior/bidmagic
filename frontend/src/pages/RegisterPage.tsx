@@ -44,7 +44,7 @@ export function RegisterPage() {
         <p className={styles.subtitle}>Escolha como você vai usar o BidMagic.</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          {error && <div className="error-box">{error}</div>}
+          {error && <div className="error-box" role="alert">{error}</div>}
 
           <div
             className={styles.roles}

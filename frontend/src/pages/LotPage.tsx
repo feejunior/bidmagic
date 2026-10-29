@@ -24,15 +24,21 @@ import styles from './LotPage.module.css'
 
 const QUICK_STEPS = [5000, 10000, 25000]
 
-export function LotPage() {
-  const lotId = Number(useParams().id)
+export function LotRoute() {
+  const { id } = useParams()
+  return <LotPage key={id} lotId={Number(id)} />
+}
+
+function LotPage({ lotId }: { lotId: number }) {
+  const validId = Number.isInteger(lotId) && lotId > 0
   const { user } = useAuth()
   const { now, sync } = useServerClock(250)
   const bidInput = useRef<HTMLInputElement>(null)
   const panel = useRef<HTMLDivElement>(null)
 
   const [lot, setLot] = useState<LotDetail | null>(null)
-  const [notFound, setNotFound] = useState(false)
+  const [notFound, setNotFound] = useState(!validId)
+  const [loadError, setLoadError] = useState(false)
   const [available, setAvailable] = useState<number | null>(null)
   const [amount, setAmount] = useState('')
   const [bidError, setBidError] = useState('')
@@ -45,15 +51,18 @@ export function LotPage() {
   usePageTitle(lot?.card.name)
 
   const loadLot = useCallback(() => {
+    if (!validId) return
     api<LotDetail>(`/lots/${lotId}`)
       .then((data) => {
-        setLot(data)
+        setLot((current) => (current && current.bid_count > data.bid_count ? current : data))
+        setLoadError(false)
         sync(data.server_now)
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 404) setNotFound(true)
+        else setLoadError(true)
       })
-  }, [lotId, sync])
+  }, [lotId, validId, sync])
 
   const loadWallet = useCallback(() => {
     if (!isBidder) return
@@ -116,7 +125,18 @@ export function LotPage() {
     [applyBid, loadWallet, sync],
   )
 
-  const connected = useLotSocket(notFound ? null : lotId, handleEvent, loadLot)
+  const finished = lot?.status === 'closed' || lot?.status === 'cancelled'
+  const connected = useLotSocket(notFound || finished ? null : lotId, handleEvent, loadLot)
+
+  const isLeader = !!user && lot?.leader_alias === user.alias
+  const wasLeader = useRef(false)
+  useEffect(() => {
+    if (wasLeader.current && !isLeader) {
+      setBidSuccess('')
+      setAnnouncement('Você foi superado.')
+    }
+    wasLeader.current = isLeader
+  }, [isLeader])
 
   const wonLot = isBidder && lot?.status === 'closed' && lot.leader_alias === user?.alias
   useEffect(() => {
@@ -167,7 +187,16 @@ export function LotPage() {
     return <NotFoundPage title="Lote não encontrado" message="Este lote não existe ou foi removido." />
   }
   if (!lot) {
-    return <p className="muted">Carregando lote...</p>
+    return loadError ? (
+      <div className="error-box" role="alert">
+        Não foi possível carregar o lote.{' '}
+        <button type="button" className="button button-ghost" onClick={loadLot}>
+          Tentar de novo
+        </button>
+      </div>
+    ) : (
+      <p className="muted">Carregando lote...</p>
+    )
   }
 
   const status = currentStatus(lot.status, lot.starts_at, lot.ends_at, now)
@@ -175,7 +204,6 @@ export function LotPage() {
   const untilStart = Date.parse(lot.starts_at) - now
   const level = urgency(remaining)
   const extended = Date.parse(lot.ends_at) !== Date.parse(lot.original_ends_at)
-  const isLeader = !!user && lot.leader_alias === user.alias
   const position = user ? lot.ranking.findIndex((entry) => entry.bidder_alias === user.alias) + 1 : 0
   const wasOutbid = !isLeader && position > 0
   const settled = lot.status === 'closed'
@@ -427,6 +455,11 @@ export function LotPage() {
 
       {status === 'live' && (
         <div className={styles.mobileBar}>
+          {isBidder && (isLeader || wasOutbid) && (
+            <p className={`${styles.barStatus} ${isLeader ? styles.winning : styles.outbid}`}>
+              {isLeader ? 'Você está ganhando!' : 'Você foi superado!'}
+            </p>
+          )}
           <div>
             <span className={styles.label}>{lot.current_bid ? 'Lance atual' : 'Lance inicial'}</span>
             <strong className={`${styles.barPrice} num`}>{formatBRL(base)}</strong>

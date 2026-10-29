@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictInt
 
 from app.schemas.lot import MAX_AMOUNT, LotSummary
 
 
 class BidCreate(BaseModel):
-    amount: int = Field(gt=0, le=MAX_AMOUNT)
+    amount: StrictInt = Field(gt=0, le=MAX_AMOUNT)
 
 
 class BidPlaced(BaseModel):

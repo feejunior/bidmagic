@@ -77,7 +77,9 @@ export function formatEndsAt(iso: string, now: number) {
 }
 
 export function parseBRL(value: string) {
-  const normalized = value.replace(/[^\d,]/g, '').replace(',', '.')
+  const text = value.replace(/[^\d.,]/g, '')
+  const dotIsDecimal = !text.includes(',') && /^\d+\.\d{1,2}$/.test(text)
+  const normalized = dotIsDecimal ? text : text.replace(/\./g, '').replace(',', '.')
   if (!normalized) {
     return null
   }

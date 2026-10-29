@@ -147,7 +147,7 @@ export function NewLotPage() {
               onChange={(event) => setQuery(event.target.value)}
               autoFocus
             />
-            {searchError && <div className="error-box">{searchError}</div>}
+            {searchError && <div className="error-box" role="alert">{searchError}</div>}
             {searching && results.length === 0 && (
               <div className={styles.results}>
                 {Array.from({ length: 6 }, (_, index) => (
@@ -269,7 +269,7 @@ export function NewLotPage() {
 
         <p className={styles.hint}>Depois de publicado, o lote não pode ser editado. Sem lances, ele pode ser cancelado.</p>
 
-        {error && <div className="error-box">{error}</div>}
+        {error && <div className="error-box" role="alert">{error}</div>}
         <button className="button" type="submit" disabled={submitting || !card}>
           {submitting ? 'Publicando...' : 'Publicar lote'}
         </button>

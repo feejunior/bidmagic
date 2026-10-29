@@ -296,3 +296,12 @@
     min-height: 180px;
   }
 }
+
+.section + .section {
+  margin-top: 34px;
+}
+
+.sectionTitle {
+  margin-bottom: 14px;
+  font-size: 20px;
+}

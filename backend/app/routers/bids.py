@@ -2,7 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter, Request
 
-from app.core.deps import CurrentBidder, CurrentUser, SessionDep
+from app.core.deps import CurrentBidder, CurrentUser, LotId, SessionDep
 from app.core.rate_limit import limiter
 from app.core.rooms import rooms
 from app.schemas.bid import BidCreate, BidPlaced, MyBids
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api", tags=["bids"])
 @limiter.limit("30/minute")
 async def place_bid(
     request: Request,
-    lot_id: int,
+    lot_id: LotId,
     data: BidCreate,
     user: CurrentUser,
     session: SessionDep,

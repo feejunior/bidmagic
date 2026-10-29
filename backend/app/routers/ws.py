@@ -1,6 +1,7 @@
 from fastapi import APIRouter, WebSocket, status
 
 from app.core.db import SessionLocal
+from app.core.deps import LotId
 from app.core.rooms import rooms
 from app.models import Lot
 
@@ -8,7 +9,7 @@ router = APIRouter()
 
 
 @router.websocket("/ws/lots/{lot_id}")
-async def lot_room(websocket: WebSocket, lot_id: int) -> None:
+async def lot_room(websocket: WebSocket, lot_id: LotId) -> None:
     async with SessionLocal() as session:
         lot = await session.get(Lot, lot_id)
     if lot is None:

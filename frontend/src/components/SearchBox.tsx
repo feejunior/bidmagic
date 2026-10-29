@@ -11,6 +11,7 @@ const SUGGESTION_LIMIT = 6
 const DEBOUNCE_MS = 200
 
 export const SEARCH_INPUT_ID = 'site-search'
+export const OPEN_SEARCH_EVENT = 'open-search'
 
 export function SearchBox({ onDone }: { onDone?: () => void }) {
   const navigate = useNavigate()
@@ -110,7 +111,8 @@ export function SearchBox({ onDone }: { onDone?: () => void }) {
       <SearchIcon className={styles.icon} />
       <input
         ref={input}
-        id={SEARCH_INPUT_ID}
+        id={onDone ? undefined : SEARCH_INPUT_ID}
+        autoFocus={!!onDone}
         className={styles.input}
         type="search"
         placeholder="Buscar carta ou coleção"

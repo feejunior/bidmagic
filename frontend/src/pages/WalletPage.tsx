@@ -74,7 +74,7 @@ export function WalletPage() {
   }
 
   if (!wallet) {
-    return error ? <div className="error-box">{error}</div> : <p className="muted">Carregando...</p>
+    return error ? <div className="error-box" role="alert">{error}</div> : <p className="muted">Carregando...</p>
   }
 
   return (
@@ -166,7 +166,7 @@ export function WalletPage() {
             ? `Máximo de ${formatBRL(MAX_DEPOSIT)} por depósito.`
             : 'Só o saldo disponível pode ser sacado. Valores em lances que você lidera ficam reservados.'}
         </small>
-        {error && <div className="error-box">{error}</div>}
+        {error && <div className="error-box" role="alert">{error}</div>}
         {success && <div className={styles.success}>{success}</div>}
       </form>
 

@@ -48,7 +48,7 @@ export function AuditPage() {
   }, [lotId])
 
   if (error) {
-    return <div className="error-box">{error}</div>
+    return <div className="error-box" role="alert">{error}</div>
   }
   if (!audit) {
     return <p className="muted">Verificando histórico...</p>
