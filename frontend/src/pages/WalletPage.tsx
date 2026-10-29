@@ -10,6 +10,7 @@ const MAX_DEPOSIT = 10_000_000
 
 const ENTRY_LABELS = {
   deposit: 'Depósito',
+  withdrawal: 'Saque',
   purchase: 'Arremate',
   sale: 'Venda',
 }
@@ -20,6 +21,7 @@ export function WalletPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [mode, setMode] = useState<'deposit' | 'withdrawal'>('deposit')
 
   const load = useCallback(() => {
     api<Wallet>('/wallet')
@@ -31,7 +33,7 @@ export function WalletPage() {
     load()
   }, [load])
 
-  async function handleDeposit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError('')
     setSuccess('')
@@ -41,20 +43,32 @@ export function WalletPage() {
       return
     }
     if (cents > MAX_DEPOSIT) {
-      setError(`O depósito máximo por operação é ${formatBRL(MAX_DEPOSIT)}.`)
+      setError(`O máximo por operação é ${formatBRL(MAX_DEPOSIT)}.`)
+      return
+    }
+    if (mode === 'withdrawal' && wallet && cents > wallet.available) {
+      setError(`Você pode sacar no máximo ${formatBRL(wallet.available)}.`)
       return
     }
     setSubmitting(true)
     try {
-      const updated = await api<Wallet>('/wallet/deposits', { method: 'POST', body: { amount: cents } })
+      const path = mode === 'deposit' ? '/wallet/deposits' : '/wallet/withdrawals'
+      const updated = await api<Wallet>(path, { method: 'POST', body: { amount: cents } })
       setWallet(updated)
       setAmount('')
-      setSuccess(`Depósito de ${formatBRL(cents)} realizado.`)
+      setSuccess(`${mode === 'deposit' ? 'Depósito' : 'Saque'} de ${formatBRL(cents)} realizado.`)
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Não foi possível depositar.')
+      setError(err instanceof ApiError ? err.message : 'Não foi possível concluir a operação.')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function switchMode(next: 'deposit' | 'withdrawal') {
+    setMode(next)
+    setError('')
+    setSuccess('')
+    setAmount('')
   }
 
   if (!wallet) {
@@ -84,9 +98,29 @@ export function WalletPage() {
         </div>
       </div>
 
-      <form className={styles.deposit} onSubmit={handleDeposit}>
-        <h2>Depositar</h2>
-        <div className={styles.quick}>
+      <form className={styles.deposit} onSubmit={handleSubmit}>
+        <div className={styles.modes} role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'deposit'}
+            className={mode === 'deposit' ? styles.modeOn : ''}
+            onClick={() => switchMode('deposit')}
+          >
+            Depositar
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'withdrawal'}
+            className={mode === 'withdrawal' ? styles.modeOn : ''}
+            onClick={() => switchMode('withdrawal')}
+          >
+            Sacar
+          </button>
+        </div>
+        {mode === 'deposit' ? (
+          <div className={styles.quick}>
           {QUICK_AMOUNTS.map((value) => (
             <button
               key={value}
@@ -97,7 +131,18 @@ export function WalletPage() {
               {formatBRL(value)}
             </button>
           ))}
-        </div>
+          </div>
+        ) : (
+          <div className={styles.quick}>
+            <button
+              type="button"
+              className={styles.chip}
+              onClick={() => setAmount((wallet.available / 100).toFixed(2).replace('.', ','))}
+            >
+              Tudo disponível ({formatBRL(wallet.available)})
+            </button>
+          </div>
+        )}
         <div className={styles.row}>
           <div className={styles.money}>
             <span>R$</span>
@@ -105,16 +150,20 @@ export function WalletPage() {
               className="input"
               inputMode="decimal"
               placeholder="0,00"
-              aria-label="Valor do depósito"
+              aria-label={mode === 'deposit' ? 'Valor do depósito' : 'Valor do saque'}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
             />
           </div>
           <button className="button" type="submit" disabled={submitting}>
-            {submitting ? 'Depositando...' : 'Depositar'}
+            {submitting ? 'Enviando...' : mode === 'deposit' ? 'Depositar' : 'Sacar'}
           </button>
         </div>
-        <small className="muted">Máximo de {formatBRL(MAX_DEPOSIT)} por depósito.</small>
+        <small className="muted">
+          {mode === 'deposit'
+            ? `Máximo de ${formatBRL(MAX_DEPOSIT)} por depósito.`
+            : 'Só o saldo disponível pode ser sacado. Valores em lances que você lidera ficam reservados.'}
+        </small>
         {error && <div className="error-box">{error}</div>}
         {success && <div className={styles.success}>{success}</div>}
       </form>

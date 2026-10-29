@@ -9,7 +9,9 @@ from app.models.base import Base
 class LedgerEntry(Base):
     __tablename__ = "ledger_entries"
     __table_args__ = (
-        CheckConstraint("type IN ('deposit', 'purchase', 'sale')", name="type"),
+        CheckConstraint(
+            "type IN ('deposit', 'withdrawal', 'purchase', 'sale')", name="type"
+        ),
         CheckConstraint("amount <> 0", name="amount_not_zero"),
     )
 
