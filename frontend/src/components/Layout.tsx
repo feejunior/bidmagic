@@ -4,7 +4,7 @@ import { useAuth } from '../auth/useAuth'
 import { applyTheme, getInitialTheme, type Theme } from '../lib/theme'
 import { CloseIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from './icons'
 import styles from './Layout.module.css'
-import { OPEN_SEARCH_EVENT, SEARCH_INPUT_ID, SearchBox } from './SearchBox'
+import { SearchBox } from './SearchBox'
 
 export function Layout() {
   const { user, logout } = useAuth()
@@ -22,16 +22,6 @@ export function Layout() {
     setMenuOpen(false)
     setSearchOpen(false)
   }, [location.pathname])
-
-  useEffect(() => {
-    function openSearch() {
-      const input = document.getElementById(SEARCH_INPUT_ID)
-      if (input?.offsetParent) input.focus()
-      else setSearchOpen(true)
-    }
-    window.addEventListener(OPEN_SEARCH_EVENT, openSearch)
-    return () => window.removeEventListener(OPEN_SEARCH_EVENT, openSearch)
-  }, [])
 
   async function handleLogout() {
     await logout()

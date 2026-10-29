@@ -7,7 +7,7 @@ from sqlalchemy.orm import aliased
 
 from app.core.config import settings
 from app.core.errors import AppError
-from app.models import Bid, Card, LedgerEntry, Lot, User
+from app.models import Bid, Card, LedgerEntry, Lot, Receipt, User
 from app.rules.audit import genesis_hash, lot_seal
 from app.rules.bidding import minimum_bid
 from app.schemas.lot import LotCreate
@@ -274,6 +274,8 @@ async def get_my_lots(session: AsyncSession, user: User) -> dict[str, Any]:
     now = utcnow()
     rows = await session.execute(
         lot_query()
+        .add_columns(Receipt.public_code)
+        .outerjoin(Receipt, Receipt.lot_id == Lot.id)
         .where(Lot.auctioneer_id == user.id)
         .order_by(Lot.created_at.desc(), Lot.id.desc())
     )
@@ -285,5 +287,5 @@ async def get_my_lots(session: AsyncSession, user: User) -> dict[str, Any]:
     return {
         "server_now": now,
         "total_received": total_received,
-        "lots": [to_summary(row, now) for row in rows],
+        "lots": [{**to_summary(row[:4], now), "receipt_code": row[4]} for row in rows],
     }

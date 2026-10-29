@@ -94,10 +94,14 @@ export type Wallet = {
   }[]
 }
 
+export type MyLot = LotSummary & {
+  receipt_code: string | null
+}
+
 export type MyLots = {
   server_now: string
   total_received: number
-  lots: LotSummary[]
+  lots: MyLot[]
 }
 
 export type CardSearchResult = {

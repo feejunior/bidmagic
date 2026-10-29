@@ -204,39 +204,6 @@
   gap: 24px 20px;
 }
 
-.prompt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  aspect-ratio: 5 / 7;
-  padding: 16px;
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--text);
-  text-align: center;
-  cursor: pointer;
-}
-
-.prompt:hover {
-  border-color: var(--accent);
-}
-
-.prompt svg {
-  color: var(--text-muted);
-}
-
-.prompt strong {
-  font-size: 15px;
-}
-
-.prompt span {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
 .empty {
   display: flex;
   flex-direction: column;
@@ -257,11 +224,6 @@
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px 12px;
-  }
-
-  .prompt {
-    aspect-ratio: auto;
-    min-height: 180px;
   }
 }
 

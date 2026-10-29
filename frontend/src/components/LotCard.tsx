@@ -19,7 +19,7 @@ export function LotCard({ lot, now, priority = false }: { lot: LotSummary; now: 
   }
 
   return (
-    <Link to={`/lotes/${lot.id}`} className={styles.card}>
+    <Link to={`/lotes/${lot.id}`} className={`${styles.card} ${status === 'closed' ? styles.closed : ''}`}>
       <div className={styles.imageWrap}>
         <img
           src={lot.card.image_url}

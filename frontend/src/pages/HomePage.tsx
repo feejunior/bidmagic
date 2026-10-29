@@ -3,9 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { LotList, LotSummary } from '../api/types'
 import { EndingSoon } from '../components/EndingSoon'
-import { CardIcon, ChevronIcon, CloseIcon, SearchIcon } from '../components/icons'
+import { CardIcon, ChevronIcon, CloseIcon } from '../components/icons'
 import { LotCard } from '../components/LotCard'
-import { OPEN_SEARCH_EVENT } from '../components/SearchBox'
 import { formatBRL } from '../lib/format'
 import { currentStatus, RARITY_LABELS } from '../lib/lots'
 import { usePageTitle } from '../lib/usePageTitle'
@@ -165,31 +164,11 @@ export function HomePage() {
   const hasFilters = statuses.length > 0 || rarities.length > 0 || !!query || !!maxPrice
   const activeFilters = statuses.length + rarities.length + (maxPrice ? 1 : 0)
 
-  const total = STATUSES.filter((item) => statuses.length === 0 || statuses.includes(item.value)).reduce(
-    (sum, item) => sum + counts[item.value],
-    0,
-  )
-  const headline = `${total} ${total === 1 ? 'lote' : 'lotes'}`
-
   const sections = STATUSES.map((item) => ({
     ...item,
     lots: lots.filter((lot) => currentStatus(lot.status, lot.starts_at, lot.ends_at, now) === item.value),
   })).filter((section) => section.lots.length > 0)
 
-  const prompt = (
-    <button
-      type="button"
-      className={styles.prompt}
-      onClick={() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))
-      }}
-    >
-      <SearchIcon size={22} />
-      <strong>Procurando uma carta?</strong>
-      <span>Busque pelo nome</span>
-    </button>
-  )
 
   const statusLabel = (value: string) => STATUSES.find((item) => item.value === value)?.label ?? value
 
@@ -257,7 +236,6 @@ export function HomePage() {
       <div className={styles.content}>
         <div className={styles.toolbar}>
           <div className={styles.summary}>
-            <span aria-live="polite">{loading ? 'Carregando...' : headline}</span>
             {statuses.map((value) => (
               <button key={value} type="button" className={styles.tag} onClick={() => remove('status', value)}>
                 {statusLabel(value)} <CloseIcon size={12} />
@@ -339,7 +317,6 @@ export function HomePage() {
                 {section.lots.map((lot, position) => (
                   <LotCard key={lot.id} lot={lot} now={now} priority={index === 0 && position < 4} />
                 ))}
-                {!loading && index === sections.length - 1 && prompt}
               </div>
             </section>
           ))
