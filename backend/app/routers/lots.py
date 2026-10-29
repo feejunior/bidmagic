@@ -5,9 +5,11 @@ from fastapi import APIRouter, Query, Request
 from app.core.deps import CurrentAuctioneer, SessionDep
 from app.core.rate_limit import limiter
 from app.schemas.lot import (
+    MAX_AMOUNT,
     LotCreate,
     LotDetail,
     LotList,
+    LotSort,
     LotStatusFilter,
     MyLots,
     Rarity,
@@ -20,14 +22,27 @@ router = APIRouter(prefix="/api", tags=["lots"])
 @router.get("/lots", response_model=LotList)
 async def list_lots(
     session: SessionDep,
-    status: LotStatusFilter | None = None,
+    status: Annotated[list[LotStatusFilter] | None, Query()] = None,
     q: Annotated[str | None, Query(max_length=100)] = None,
-    rarity: Rarity | None = None,
+    rarity: Annotated[list[Rarity] | None, Query()] = None,
+    min_price: Annotated[int | None, Query(ge=0, le=MAX_AMOUNT)] = None,
+    max_price: Annotated[int | None, Query(ge=0, le=MAX_AMOUNT)] = None,
+    sort: LotSort = "ending",
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> dict[str, Any]:
     query = q.strip() if q else None
-    return await lot_service.list_lots(session, status, query, rarity, limit, offset)
+    return await lot_service.list_lots(
+        session,
+        status or [],
+        query,
+        rarity or [],
+        min_price,
+        max_price,
+        sort,
+        limit,
+        offset,
+    )
 
 
 @router.get("/lots/{lot_id}", response_model=LotDetail)

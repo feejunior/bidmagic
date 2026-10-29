@@ -5,6 +5,7 @@ from pydantic import AwareDatetime, BaseModel, Field, field_validator
 
 LotStatus = Literal["scheduled", "live", "closed", "cancelled"]
 LotStatusFilter = Literal["scheduled", "live", "closed"]
+LotSort = Literal["ending", "highest_bid", "newest"]
 Rarity = Literal["common", "uncommon", "rare", "mythic", "special", "bonus"]
 
 MAX_AMOUNT = 1_000_000_000
@@ -72,9 +73,17 @@ class LotDetail(LotSummary):
     server_now: datetime
 
 
+class StatusCounts(BaseModel):
+    live: int
+    scheduled: int
+    closed: int
+
+
 class LotList(BaseModel):
     server_now: datetime
     items: list[LotSummary]
+    counts: StatusCounts
+    price_ceiling: int
 
 
 class MyLots(BaseModel):

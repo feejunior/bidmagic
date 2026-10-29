@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.core.config import settings
-from app.core.deps import ACCESS_COOKIE, CurrentUser, SessionDep
+from app.core.deps import ACCESS_COOKIE, OptionalUser, SessionDep
 from app.core.errors import AppError
 from app.core.rate_limit import limiter
 from app.core.security import create_access_token, hash_password, verify_password
@@ -81,6 +81,6 @@ async def logout(response: Response) -> None:
     response.delete_cookie(ACCESS_COOKIE, path="/", secure=True, httponly=True)
 
 
-@router.get("/me", response_model=UserOut)
-async def me(user: CurrentUser) -> User:
+@router.get("/me", response_model=UserOut | None)
+async def me(user: OptionalUser) -> User | None:
     return user

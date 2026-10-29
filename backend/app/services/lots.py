@@ -93,38 +93,89 @@ def to_summary(row: Row, now: datetime) -> dict[str, Any]:
     }
 
 
+def current_price() -> ColumnElement[int]:
+    return func.coalesce(Lot.current_bid, Lot.starting_bid)
+
+
+def apply_filters(
+    query: Select,
+    q: str | None,
+    rarities: list[str],
+    min_price: int | None,
+    max_price: int | None,
+) -> Select:
+    query = query.where(Lot.status != "cancelled")
+    if q:
+        query = query.where(Card.name.icontains(q, autoescape=True))
+    if rarities:
+        query = query.where(Card.rarity.in_(rarities))
+    if min_price is not None:
+        query = query.where(current_price() >= min_price)
+    if max_price is not None:
+        query = query.where(current_price() <= max_price)
+    return query
+
+
 async def list_lots(
     session: AsyncSession,
-    status: str | None,
+    statuses: list[str],
     q: str | None,
-    rarity: str | None,
+    rarities: list[str],
+    min_price: int | None,
+    max_price: int | None,
+    sort: str,
     limit: int,
     offset: int,
 ) -> dict[str, Any]:
     now = utcnow()
-    query = lot_query()
+    query = apply_filters(lot_query(), q, rarities, min_price, max_price)
+    if statuses:
+        query = query.where(or_(*(status_filter(status, now) for status in statuses)))
 
-    if status:
-        query = query.where(status_filter(status, now))
+    if sort == "highest_bid":
+        query = query.order_by(current_price().desc(), Lot.id.desc())
+    elif sort == "newest":
+        query = query.order_by(Lot.created_at.desc(), Lot.id.desc())
     else:
-        query = query.where(Lot.status != "cancelled")
-    if q:
-        query = query.where(Card.name.icontains(q, autoescape=True))
-    if rarity:
-        query = query.where(Card.rarity == rarity)
-
-    rank = case(
-        (status_filter("closed", now), 2),
-        (status_filter("scheduled", now), 1),
-        else_=0,
-    )
-    open_ends_at = case((rank == 2, None), else_=Lot.ends_at)
-    query = query.order_by(
-        rank, open_ends_at.asc().nulls_last(), Lot.ends_at.desc(), Lot.id.desc()
-    )
+        rank = case(
+            (status_filter("closed", now), 2),
+            (status_filter("scheduled", now), 1),
+            else_=0,
+        )
+        open_ends_at = case((rank == 2, None), else_=Lot.ends_at)
+        query = query.order_by(
+            rank, open_ends_at.asc().nulls_last(), Lot.ends_at.desc(), Lot.id.desc()
+        )
 
     rows = (await session.execute(query.limit(limit).offset(offset))).all()
-    return {"server_now": now, "items": [to_summary(row, now) for row in rows]}
+
+    counts_query = apply_filters(
+        select(
+            func.count().filter(status_filter("live", now)),
+            func.count().filter(status_filter("scheduled", now)),
+            func.count().filter(status_filter("closed", now)),
+        )
+        .select_from(Lot)
+        .join(Card, Card.id == Lot.card_id),
+        q,
+        rarities,
+        min_price,
+        max_price,
+    )
+    live, scheduled, closed = (await session.execute(counts_query)).one()
+
+    price_ceiling = await session.scalar(
+        select(func.coalesce(func.max(current_price()), 0)).where(
+            Lot.status != "cancelled"
+        )
+    )
+
+    return {
+        "server_now": now,
+        "items": [to_summary(row, now) for row in rows],
+        "counts": {"live": live, "scheduled": scheduled, "closed": closed},
+        "price_ceiling": price_ceiling,
+    }
 
 
 async def get_lot_detail(session: AsyncSession, lot_id: int) -> dict[str, Any]:
