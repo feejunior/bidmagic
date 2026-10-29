@@ -8,15 +8,13 @@ Casa de leilões online de cartas **Magic: The Gathering**. Leiloeiros publicam 
 
 Criadas pelo seed (todas com a senha `bidmagic123`):
 
-| Papel | E-mail | Saldo inicial |
-|---|---|---|
-| Leiloeiro | `leiloeiro@bidmagic.dev` | — |
-| Licitante | `ana@bidmagic.dev` | R$ 5.000,00 |
-| Licitante | `bruno@bidmagic.dev` | R$ 5.000,00 |
+| Papel     | E-mail                   | Saldo inicial |
+| --------- | ------------------------ | ------------- |
+| Leiloeiro | `leiloeiro@bidmagic.dev` | —             |
+| Licitante | `ana@bidmagic.dev`       | R$ 5.000,00   |
+| Licitante | `bruno@bidmagic.dev`     | R$ 5.000,00   |
 
 O seed também cria 5 lotes com cartas reais: dois **ao vivo com lances** (Black Lotus e Lightning Bolt), um ao vivo sem lances (Sol Ring), um **agendado** (Serra Angel) e um **já encerrado** com comprovante (Counterspell, arrematado pelo Bruno).
-
-> Dica para testar o tempo real: abra o mesmo lote com a Ana em uma janela e com o Bruno em uma janela anônima (ou no celular). Os lances de um aparecem na hora para o outro.
 
 ---
 
@@ -32,7 +30,6 @@ O seed também cria 5 lotes com cartas reais: dois **ao vivo com lances** (Black
 - [Comportamentos que podem parecer inesperados](#comportamentos-que-podem-parecer-inesperados)
 - [API](#api)
 - [Estrutura de pastas](#estrutura-de-pastas)
-- [Fora do escopo e próximos passos](#fora-do-escopo-e-próximos-passos)
 - [Créditos](#créditos)
 
 ---
@@ -41,21 +38,21 @@ O seed também cria 5 lotes com cartas reais: dois **ao vivo com lances** (Black
 
 ### Requisitos do desafio
 
-| Requisito | Onde |
-|---|---|
-| Dois papéis fixos (leiloeiro não dá lance) | Cadastro com escolha de papel; o back valida o papel em cada rota |
-| Vitrine com ao vivo / agendados / encerrados, sem cancelados | `/` |
-| Painel do leiloeiro: buscar na API externa, criar lote, cancelar sem lances, resultado e total recebido | `/painel`, `/painel/novo` |
-| Sala ao vivo: lance atual, histórico, **posição do usuário**, contagem regressiva, "você está ganhando / foi superado", sem recarregar | `/lotes/:id` (WebSocket) |
-| Carteira: total, comprometido, disponível, depósito simulado | `/carteira` |
-| Meus arremates: lotes com lance, vencidos, comprovante e link de compartilhamento | `/meus-lances`, `/comprovante/:codigo` |
-| Auditoria pública, sem login, íntegro × adulterado | `/auditoria/:id` |
-| Mensagem clara para cada lance recusado | abaixo do mínimo, saldo insuficiente, já está ganhando, não iniciado, encerrado, cancelado |
-| Regras de lance, saldo comprometido, anti-sniping, liquidação | ver [Decisões técnicas](#decisões-técnicas) |
-| Histórico à prova de adulteração (inclusive direto no banco) | corrente de hashes HMAC + selo + âncora no comprovante |
-| Privacidade | auditoria e comprovante mostram só codinomes (`Licitante #7F3A2B`) |
-| Funciona com a API externa fora do ar | cartas e imagens ficam salvas localmente |
-| Deploy | https://bidmagic.compreocerto.com |
+| Requisito                                                                                                                              | Onde                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Dois papéis fixos (leiloeiro não dá lance)                                                                                             | Cadastro com escolha de papel; o back valida o papel em cada rota                          |
+| Vitrine com ao vivo / agendados / encerrados, sem cancelados                                                                           | `/`                                                                                        |
+| Painel do leiloeiro: buscar na API externa, criar lote, cancelar sem lances, resultado e total recebido                                | `/painel`, `/painel/novo`                                                                  |
+| Sala ao vivo: lance atual, histórico, **posição do usuário**, contagem regressiva, "você está ganhando / foi superado", sem recarregar | `/lotes/:id` (WebSocket)                                                                   |
+| Carteira: total, comprometido, disponível, depósito simulado                                                                           | `/carteira`                                                                                |
+| Meus arremates: lotes com lance, vencidos, comprovante e link de compartilhamento                                                      | `/meus-lances`, `/comprovante/:codigo`                                                     |
+| Auditoria pública, sem login, íntegro × adulterado                                                                                     | `/auditoria/:id`                                                                           |
+| Mensagem clara para cada lance recusado                                                                                                | abaixo do mínimo, saldo insuficiente, já está ganhando, não iniciado, encerrado, cancelado |
+| Regras de lance, saldo comprometido, anti-sniping, liquidação                                                                          | ver [Decisões técnicas](#decisões-técnicas)                                                |
+| Histórico à prova de adulteração (inclusive direto no banco)                                                                           | corrente de hashes HMAC + selo + âncora no comprovante                                     |
+| Privacidade                                                                                                                            | auditoria e comprovante mostram só codinomes (`Licitante #7F3A2B`)                         |
+| Funciona com a API externa fora do ar                                                                                                  | cartas e imagens ficam salvas localmente                                                   |
+| Deploy                                                                                                                                 | https://bidmagic.compreocerto.com                                                          |
 
 ### Opcionais
 
@@ -76,16 +73,16 @@ O seed também cria 5 lotes com cartas reais: dois **ao vivo com lances** (Black
 
 ## Stack
 
-| Camada | Tecnologia |
-|---|---|
-| Front-end | React 19 + Vite + TypeScript, React Router, CSS Modules |
-| Back-end | Python 3.12 + FastAPI (async), SQLAlchemy 2 (async) + psycopg 3, Alembic, Pydantic |
-| Banco | PostgreSQL 17 |
-| Tempo real | WebSocket nativo do FastAPI |
-| Autenticação | JWT (HS256) em cookie `httpOnly`, senhas com Argon2id (`pwdlib`) |
-| API externa | [Scryfall](https://scryfall.com/docs/api) (cartas de Magic) |
-| Infra | Docker Compose, nginx (proxy reverso + HTTPS), certbot (Let's Encrypt), VPS Ubuntu 24.04 |
-| Ferramentas | uv (dependências Python), ruff (lint/format), pytest, ESLint |
+| Camada       | Tecnologia                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| Front-end    | React 19 + Vite + TypeScript, React Router, CSS Modules                                  |
+| Back-end     | Python 3.12 + FastAPI (async), SQLAlchemy 2 (async) + psycopg 3, Alembic, Pydantic       |
+| Banco        | PostgreSQL 17                                                                            |
+| Tempo real   | WebSocket nativo do FastAPI                                                              |
+| Autenticação | JWT (HS256) em cookie `httpOnly`, senhas com Argon2id (`pwdlib`)                         |
+| API externa  | [Scryfall](https://scryfall.com/docs/api) (cartas de Magic)                              |
+| Infra        | Docker Compose, nginx (proxy reverso + HTTPS), certbot (Let's Encrypt), VPS Ubuntu 24.04 |
+| Ferramentas  | uv (dependências Python), ruff (lint/format), pytest, ESLint                             |
 
 ---
 
@@ -133,14 +130,14 @@ Edite o `.env` e troque os valores `change-me`. Para gerar segredos fortes:
 openssl rand -hex 32
 ```
 
-| Variável | Para que serve |
-|---|---|
-| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Usuário **dono** do banco (usado só pelas migrações) |
-| `APP_DB_USER` / `APP_DB_PASSWORD` | Usuário **restrito** usado pela aplicação (criado automaticamente na primeira subida do banco) |
-| `JWT_SECRET` | Assina os tokens de sessão |
-| `AUDIT_HMAC_KEY` | Chave secreta da corrente de hashes da auditoria |
-| `ANTI_SNIPING_EXTEND_FROM_END` | `false` (padrão): lance no fim leva o término para *agora + 2 min*. `true`: *fim atual + 2 min* |
-| `DOMAIN` | Só para produção (domínio do certificado HTTPS) |
+| Variável                                              | Para que serve                                                                                  |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Usuário **dono** do banco (usado só pelas migrações)                                            |
+| `APP_DB_USER` / `APP_DB_PASSWORD`                     | Usuário **restrito** usado pela aplicação (criado automaticamente na primeira subida do banco)  |
+| `JWT_SECRET`                                          | Assina os tokens de sessão                                                                      |
+| `AUDIT_HMAC_KEY`                                      | Chave secreta da corrente de hashes da auditoria                                                |
+| `ANTI_SNIPING_EXTEND_FROM_END`                        | `false` (padrão): lance no fim leva o término para _agora + 2 min_. `true`: _fim atual + 2 min_ |
+| `DOMAIN`                                              | Só para produção (domínio do certificado HTTPS)                                                 |
 
 ### 2. Banco de dados
 
@@ -284,7 +281,7 @@ O comprometido **não é guardado em coluna**: é calculado na hora. Assim não 
 
 ### Anti-sniping
 
-Lance aceito quando faltam **2 minutos ou menos** estende o fim. Por padrão, o novo fim é **agora + 2 min** (*soft close*: sempre sobram 2 minutos para reagir). Com `ANTI_SNIPING_EXTEND_FROM_END=true`, vira **fim atual + 2 min**. O PDF admite as duas leituras, então ficou configurável e isolado em `calculate_new_end()`, com testes dos dois modos. O fim original fica salvo (`original_ends_at`) e a sala avisa quando houve prorrogação.
+Lance aceito quando faltam **2 minutos ou menos** estende o fim. Por padrão, o novo fim é **agora + 2 min** (_soft close_: sempre sobram 2 minutos para reagir). Com `ANTI_SNIPING_EXTEND_FROM_END=true`, vira **fim atual + 2 min**. O PDF admite as duas leituras, então ficou configurável e isolado em `calculate_new_end()`, com testes dos dois modos. O fim original fica salvo (`original_ends_at`) e a sala avisa quando houve prorrogação.
 
 ### Liquidação
 
@@ -307,12 +304,12 @@ hash anterior do 1º lance = HMAC(chave, "genesis|lote_id")
 selo do lote   = HMAC(chave, "lote_id|quantidade_de_lances|hash do último lance")
 ```
 
-| Ataque direto no banco | Como é detectado |
-|---|---|
-| Alterar um lance | O hash recalculado não bate |
-| Remover ou inserir no meio | O "hash anterior" do lance seguinte não bate |
-| Remover o último lance | O **selo** do lote não bate |
-| Mover um lance para outro lote | O `lote_id` faz parte do hash |
+| Ataque direto no banco                    | Como é detectado                                                                    |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| Alterar um lance                          | O hash recalculado não bate                                                         |
+| Remover ou inserir no meio                | O "hash anterior" do lance seguinte não bate                                        |
+| Remover o último lance                    | O **selo** do lote não bate                                                         |
+| Mover um lance para outro lote            | O `lote_id` faz parte do hash                                                       |
 | Quem tem banco **e** chave reescreve tudo | O **comprovante** guarda o último hash: a cópia do vencedor vira uma âncora externa |
 
 - Por que HMAC e não um SHA-256 simples: com hash simples, quem tem acesso ao banco recalcula a corrente inteira. Com HMAC, é preciso também a chave, que não está no banco.
@@ -373,26 +370,26 @@ Cada usuário recebe um **codinome aleatório fixo** (`Licitante #7F3A2B`). Sala
 
 Documentação interativa (OpenAPI) em `/docs` quando o back-end roda localmente.
 
-| Método | Rota | Quem | O que faz |
-|---|---|---|---|
-| POST | `/api/auth/register` | público | Cadastro (nome, e-mail, senha, papel) |
-| POST | `/api/auth/login` | público | Login (grava o cookie) |
-| POST | `/api/auth/logout` | logado | Apaga o cookie |
-| GET | `/api/auth/me` | logado | Usuário atual |
-| GET | `/api/cards/search?q=` | leiloeiro | Busca no Scryfall |
-| GET | `/api/lots?status=&q=&rarity=` | público | Vitrine com filtros |
-| GET | `/api/lots/{id}` | público | Detalhe, últimos lances e ranking |
-| POST | `/api/lots` | leiloeiro | Cria lote (`scryfall_id`, valores, início, duração) |
-| POST | `/api/lots/{id}/cancel` | leiloeiro dono | Cancela (só sem lances) |
-| GET | `/api/my-lots` | leiloeiro | Painel com resultados e total recebido |
-| POST | `/api/lots/{id}/bids` | licitante | Dá lance |
-| GET | `/api/my-bids` | licitante | Lotes com lance e comprovantes |
-| GET | `/api/wallet` | licitante | Saldos e extrato |
-| POST | `/api/wallet/deposits` | licitante | Depósito simulado (até R$ 100.000) |
-| POST | `/api/wallet/withdrawals` | licitante | Saque simulado (até o disponível) |
-| GET | `/api/receipts/{codigo}` | público | Comprovante |
-| GET | `/api/audit/lots/{id}` | público | Auditoria do histórico |
-| WS | `/ws/lots/{id}` | público | Eventos `bid_placed` e `lot_closed` |
+| Método | Rota                           | Quem           | O que faz                                           |
+| ------ | ------------------------------ | -------------- | --------------------------------------------------- |
+| POST   | `/api/auth/register`           | público        | Cadastro (nome, e-mail, senha, papel)               |
+| POST   | `/api/auth/login`              | público        | Login (grava o cookie)                              |
+| POST   | `/api/auth/logout`             | logado         | Apaga o cookie                                      |
+| GET    | `/api/auth/me`                 | logado         | Usuário atual                                       |
+| GET    | `/api/cards/search?q=`         | leiloeiro      | Busca no Scryfall                                   |
+| GET    | `/api/lots?status=&q=&rarity=` | público        | Vitrine com filtros                                 |
+| GET    | `/api/lots/{id}`               | público        | Detalhe, últimos lances e ranking                   |
+| POST   | `/api/lots`                    | leiloeiro      | Cria lote (`scryfall_id`, valores, início, duração) |
+| POST   | `/api/lots/{id}/cancel`        | leiloeiro dono | Cancela (só sem lances)                             |
+| GET    | `/api/my-lots`                 | leiloeiro      | Painel com resultados e total recebido              |
+| POST   | `/api/lots/{id}/bids`          | licitante      | Dá lance                                            |
+| GET    | `/api/my-bids`                 | licitante      | Lotes com lance e comprovantes                      |
+| GET    | `/api/wallet`                  | licitante      | Saldos e extrato                                    |
+| POST   | `/api/wallet/deposits`         | licitante      | Depósito simulado (até R$ 100.000)                  |
+| POST   | `/api/wallet/withdrawals`      | licitante      | Saque simulado (até o disponível)                   |
+| GET    | `/api/receipts/{codigo}`       | público        | Comprovante                                         |
+| GET    | `/api/audit/lots/{id}`         | público        | Auditoria do histórico                              |
+| WS     | `/ws/lots/{id}`                | público        | Eventos `bid_placed` e `lot_closed`                 |
 
 Códigos de erro de lance: `AUCTIONEER_CANNOT_BID`, `LOT_CANCELLED`, `LOT_NOT_STARTED`, `LOT_CLOSED`, `ALREADY_WINNING`, `BELOW_MINIMUM`, `INSUFFICIENT_FUNDS`.
 
@@ -424,18 +421,6 @@ db/init/         script que cria o usuário restrito do banco
 docker-compose.yml        banco para desenvolvimento
 docker-compose.prod.yml   produção completa
 ```
-
----
-
-## Fora do escopo e próximos passos
-
-- Edição de lote (por decisão: regras não mudam depois de publicadas).
-- Confirmação de e-mail e recuperação de senha (o PDF dispensa).
-- Papel de administrador (moderação, aprovação de leiloeiros).
-- Codinome diferente por lote (hoje é fixo por usuário).
-- Assinatura digital (Ed25519) na auditoria, para verificação pública sem o segredo do servidor.
-- Redis pub/sub para rodar vários processos do back-end.
-- Testes de integração da API e testes end-to-end do front.
 
 ---
 
