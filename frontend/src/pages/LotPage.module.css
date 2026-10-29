@@ -225,9 +225,21 @@
   font-weight: 600;
 }
 
-.history h2 {
-  font-size: 18px;
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 10px;
+}
+
+.historyHeader h2 {
+  font-size: 18px;
+}
+
+.historyHeader a {
+  font-size: 13px;
 }
 
 .bids {

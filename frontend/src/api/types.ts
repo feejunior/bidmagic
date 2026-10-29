@@ -105,3 +105,46 @@ export type CardSearchResult = {
   type_line: string | null
   image_url: string
 }
+
+export type MyBids = {
+  server_now: string
+  items: {
+    lot: LotSummary
+    my_highest_bid: number
+    is_leader: boolean
+    receipt_code: string | null
+  }[]
+}
+
+export type Receipt = {
+  public_code: string
+  lot_id: number
+  card: Card
+  auctioneer_alias: string
+  winner_alias: string
+  final_amount: number
+  last_hash: string
+  issued_at: string
+}
+
+export type Audit = {
+  lot_id: number
+  card_name: string
+  status: LotStatus
+  bid_count: number
+  genesis_hash: string
+  last_hash: string | null
+  seal: string | null
+  seal_valid: boolean
+  receipt_hash_valid: boolean | null
+  valid: boolean
+  bids: {
+    id: number
+    bidder_alias: string
+    amount: number
+    created_at: string
+    prev_hash: string
+    hash: string
+    valid: boolean
+  }[]
+}
