@@ -11,7 +11,6 @@ const SUGGESTION_LIMIT = 6
 const DEBOUNCE_MS = 200
 
 export const SEARCH_INPUT_ID = 'site-search'
-export const OPEN_SEARCH_EVENT = 'open-search'
 
 export function SearchBox({ onDone }: { onDone?: () => void }) {
   const navigate = useNavigate()
@@ -115,8 +114,8 @@ export function SearchBox({ onDone }: { onDone?: () => void }) {
         autoFocus={!!onDone}
         className={styles.input}
         type="search"
-        placeholder="Buscar carta ou coleção"
-        aria-label="Buscar carta ou coleção"
+        placeholder="Está buscando uma carta ou coleção?"
+        aria-label="Está buscando uma carta ou coleção?"
         role="combobox"
         aria-expanded={showList}
         aria-controls={listId}

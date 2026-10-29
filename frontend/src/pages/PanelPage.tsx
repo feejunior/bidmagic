@@ -129,6 +129,11 @@ export function PanelPage() {
                   </span>
                 </div>
                 <div className={styles.actions}>
+                  {lot.receipt_code && (
+                    <Link to={`/comprovante/${lot.receipt_code}`} className="button button-ghost">
+                      Ver comprovante
+                    </Link>
+                  )}
                   {canCancel && (
                     <button
                       type="button"

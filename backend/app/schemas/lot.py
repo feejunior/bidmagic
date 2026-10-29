@@ -88,7 +88,11 @@ class LotList(BaseModel):
     price_ceiling: int
 
 
+class MyLot(LotSummary):
+    receipt_code: str | None
+
+
 class MyLots(BaseModel):
     server_now: datetime
     total_received: int
-    lots: list[LotSummary]
+    lots: list[MyLot]
