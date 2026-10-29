@@ -54,6 +54,8 @@ export type LotDetail = LotSummary & {
 export type LotList = {
   server_now: string
   items: LotSummary[]
+  counts: { live: number; scheduled: number; closed: number }
+  price_ceiling: number
 }
 
 export type BidPlaced = {

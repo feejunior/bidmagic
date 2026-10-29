@@ -106,7 +106,12 @@ def apply_filters(
 ) -> Select:
     query = query.where(Lot.status != "cancelled")
     if q:
-        query = query.where(Card.name.icontains(q, autoescape=True))
+        query = query.where(
+            or_(
+                Card.name.icontains(q, autoescape=True),
+                Card.set_name.icontains(q, autoescape=True),
+            )
+        )
     if rarities:
         query = query.where(Card.rarity.in_(rarities))
     if min_price is not None:

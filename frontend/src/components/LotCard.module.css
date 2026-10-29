@@ -1,122 +1,114 @@
 .card {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  gap: 10px;
   color: var(--text);
-  box-shadow: var(--shadow);
-  transition: transform 0.15s, border-color 0.15s;
 }
 
 .card:hover {
   color: var(--text);
-  border-color: var(--accent);
-  transform: translateY(-2px);
 }
 
 .imageWrap {
   position: relative;
   display: flex;
   justify-content: center;
-  padding: 16px 16px 0;
-  background: var(--surface-2);
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color 0.15s;
+}
+
+.card:hover .imageWrap {
+  border-color: var(--accent);
 }
 
 .image {
   width: 100%;
-  max-width: 220px;
+  max-width: 190px;
   aspect-ratio: 488 / 680;
-  border-radius: 10px 10px 0 0;
+  border-radius: 4.75% / 3.5%;
   object-fit: cover;
+  transition: transform 0.2s;
 }
 
-.tags {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+.card:hover .image {
+  transform: scale(1.02);
 }
 
-.rarity {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: var(--text-muted);
+.pill {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 60%);
+  color: #f2f2f0;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
 }
 
-.rarity[data-rarity='uncommon'] {
-  color: #8fb3c9;
+.pillUrgent {
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
-.rarity[data-rarity='rare'] {
-  color: var(--accent);
+.pillScheduled {
+  background: rgb(0 0 0 / 60%);
+  color: var(--accent-strong);
 }
 
-.rarity[data-rarity='mythic'] {
-  color: #e8673c;
+.pillMuted {
+  background: rgb(0 0 0 / 55%);
+  color: #b8b6b1;
 }
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px 16px;
+  gap: 1px;
+  min-width: 0;
 }
 
 .name {
-  font-size: 16px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.meta {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .price {
-  display: flex;
-  flex-direction: column;
-}
-
-.priceLabel {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.priceValue {
-  font-size: 20px;
   color: var(--accent);
+  font-size: 15px;
 }
 
-.footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+.meta {
   font-size: 13px;
   color: var(--text-muted);
 }
 
-.timeLive {
-  color: var(--text);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+@media (max-width: 560px) {
+  .imageWrap {
+    padding: 8px;
+  }
+
+  .name,
+  .price {
+    font-size: 14px;
+  }
+
+  .meta {
+    font-size: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card {
+  .image,
+  .card:hover .image {
     transition: none;
-  }
-
-  .card:hover {
     transform: none;
   }
 }

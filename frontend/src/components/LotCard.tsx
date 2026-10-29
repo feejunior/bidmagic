@@ -1,50 +1,42 @@
 import { Link } from 'react-router-dom'
 import type { LotSummary } from '../api/types'
 import { formatBRL } from '../lib/format'
-import { currentStatus, formatRemaining, RARITY_LABELS } from '../lib/lots'
+import { currentStatus, formatRemaining, urgency } from '../lib/lots'
 import styles from './LotCard.module.css'
-import { StatusBadge } from './StatusBadge'
 
-export function LotCard({ lot, now }: { lot: LotSummary; now: number }) {
+export function LotCard({ lot, now, priority = false }: { lot: LotSummary; now: number; priority?: boolean }) {
   const status = currentStatus(lot.status, lot.starts_at, lot.ends_at, now)
-  const hasBids = lot.current_bid !== null
+  const remaining = Date.parse(lot.ends_at) - now
 
-  let timeLabel = ''
+  let pill = 'Encerrado'
+  let tone = styles.pillMuted
   if (status === 'live') {
-    timeLabel = `Termina em ${formatRemaining(Date.parse(lot.ends_at) - now)}`
+    pill = formatRemaining(remaining)
+    tone = urgency(remaining) === 'normal' ? '' : styles.pillUrgent
   } else if (status === 'scheduled') {
-    timeLabel = `Começa em ${formatRemaining(Date.parse(lot.starts_at) - now)}`
+    pill = `Começa em ${formatRemaining(Date.parse(lot.starts_at) - now)}`
+    tone = styles.pillScheduled
   }
 
   return (
     <Link to={`/lotes/${lot.id}`} className={styles.card}>
       <div className={styles.imageWrap}>
-        <img src={lot.card.image_url} alt={lot.card.name} loading="lazy" className={styles.image} />
+        <img
+          src={lot.card.image_url}
+          alt={lot.card.name}
+          className={styles.image}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+        />
+        <span className={`${styles.pill} ${tone} num`}>{pill}</span>
       </div>
-
       <div className={styles.body}>
-        <div className={styles.tags}>
-          <StatusBadge status={status} />
-          <span className={styles.rarity} data-rarity={lot.card.rarity}>
-            {RARITY_LABELS[lot.card.rarity] ?? lot.card.rarity}
-          </span>
-        </div>
         <h3 className={styles.name}>{lot.card.name}</h3>
-        <p className={styles.meta}>{lot.card.set_name}</p>
-
-        <div className={styles.price}>
-          <span className={styles.priceLabel}>
-            {status === 'closed' ? (hasBids ? 'Arrematado por' : 'Sem lances') : hasBids ? 'Lance atual' : 'Lance inicial'}
-          </span>
-          <strong className={styles.priceValue}>{formatBRL(lot.current_bid ?? lot.starting_bid)}</strong>
-        </div>
-
-        <div className={styles.footer}>
-          <span>
-            {lot.bid_count} {lot.bid_count === 1 ? 'lance' : 'lances'}
-          </span>
-          {timeLabel && <span className={status === 'live' ? styles.timeLive : ''}>{timeLabel}</span>}
-        </div>
+        <strong className={`${styles.price} num`}>{formatBRL(lot.current_bid ?? lot.starting_bid)}</strong>
+        <span className={styles.meta}>
+          {lot.bid_count === 0 ? 'Sem lances' : `${lot.bid_count} ${lot.bid_count === 1 ? 'lance' : 'lances'}`}
+          {status === 'closed' && lot.bid_count > 0 && ' · vendido'}
+        </span>
       </div>
     </Link>
   )

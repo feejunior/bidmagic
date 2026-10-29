@@ -7,26 +7,29 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
   border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
 }
 
-.headerInner {
-  padding: 12px 24px;
+.bar {
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
+  gap: 20px;
+  height: 60px;
+  padding: 0 24px;
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 21px;
+  font-weight: 650;
   color: var(--text);
-  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .brand:hover {
@@ -39,33 +42,84 @@
 
 .nav {
   display: flex;
-  gap: 4px;
-  flex: 1;
-  flex-wrap: wrap;
+  gap: 18px;
 }
 
 .navLink {
-  padding: 6px 12px;
-  border-radius: 8px;
+  position: relative;
+  padding: 18px 0;
   color: var(--text-muted);
   font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .navLink:hover {
   color: var(--text);
-  background: var(--surface-2);
 }
 
 .active {
   color: var(--text);
-  background: var(--surface-2);
+}
+
+.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.search {
+  flex: 1;
+  max-width: 420px;
+  margin-left: auto;
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-left: auto;
+  gap: 14px;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--surface-2);
+}
+
+.textButton {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.textButton:hover {
+  color: var(--accent);
+}
+
+.cta {
+  padding: 8px 14px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .alias {
@@ -75,26 +129,133 @@
   white-space: nowrap;
 }
 
+.mobileActions,
+.mobileSearch,
+.drawer {
+  display: none;
+}
+
 .main {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 24px 24px 56px;
 }
 
-@media (max-width: 640px) {
-  .headerInner {
-    gap: 12px;
-    padding: 12px 16px;
-  }
+.footer {
+  border-top: 1px solid var(--border);
+}
 
-  .nav {
-    order: 3;
-    flex-basis: 100%;
-  }
+.footerInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
 
+.footerLinks {
+  display: flex;
+  gap: 16px;
+}
+
+.footerLinks a {
+  color: var(--text-muted);
+}
+
+.footerLinks a:hover {
+  color: var(--text);
+}
+
+.credits {
+  flex-basis: 100%;
+  font-size: 12px;
+}
+
+@media (max-width: 1080px) {
   .alias {
     display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .bar {
+    gap: 12px;
+    height: 56px;
+    padding: 0 16px;
+  }
+
+  .nav,
+  .search,
+  .actions {
+    display: none;
+  }
+
+  .mobileActions {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .mobileSearch {
+    display: block;
+    padding: 0 16px 12px;
+  }
+
+  .drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .drawerNav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .drawerNav .navLink {
+    padding: 12px 0;
+    font-size: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .drawerNav .active::after {
+    display: none;
+  }
+
+  .drawerNav .active {
+    color: var(--accent);
+  }
+
+  .drawerFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .drawerAccount {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .drawerAccount .alias {
+    display: inline;
+  }
+
+  .main {
+    padding: 16px 16px 48px;
+  }
+
+  .footerInner {
+    padding: 16px;
   }
 }
