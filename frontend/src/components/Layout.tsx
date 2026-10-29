@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { applyTheme, getInitialTheme, type Theme } from '../lib/theme'
 import styles from './Layout.module.css'
+import { ThemeSwitch } from './ThemeSwitch'
 
 export function Layout() {
   const { user, logout } = useAuth()
@@ -51,14 +52,7 @@ export function Layout() {
           </nav>
 
           <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.themeToggle}
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label={theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-            >
-              {theme === 'dark' ? '☀' : '☾'}
-            </button>
+            <ThemeSwitch theme={theme} onChange={setTheme} />
             {user ? (
               <>
                 <span className={styles.alias} title={user.name}>
