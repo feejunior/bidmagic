@@ -1,0 +1,82 @@
+.stage {
+  perspective: 900px;
+}
+
+.card {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+
+  position: relative;
+  overflow: hidden;
+  border-radius: 4.75% / 3.5%;
+  box-shadow: var(--shadow);
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease, box-shadow 0.3s;
+  will-change: transform;
+}
+
+.card[data-active] {
+  transition: transform 0.08s linear, box-shadow 0.3s;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 45%);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  user-select: none;
+}
+
+.glare,
+.shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.glare {
+  background: radial-gradient(
+    circle at var(--mx) var(--my),
+    rgb(255 255 255 / 45%) 0%,
+    rgb(255 255 255 / 12%) 30%,
+    transparent 60%
+  );
+  mix-blend-mode: overlay;
+}
+
+.shine {
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgb(255 0 132 / 35%) 36%,
+    rgb(252 164 0 / 35%) 43%,
+    rgb(255 255 0 / 30%) 50%,
+    rgb(0 255 138 / 30%) 57%,
+    rgb(0 207 255 / 35%) 64%,
+    rgb(204 76 250 / 35%) 71%,
+    transparent 85%
+  );
+  background-size: 250% 250%;
+  background-position: var(--mx) var(--my);
+  mix-blend-mode: color-dodge;
+}
+
+.card[data-active] .glare {
+  opacity: 1;
+}
+
+.foil[data-active] .shine {
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card[data-active] {
+    transform: none;
+    transition: none;
+  }
+}

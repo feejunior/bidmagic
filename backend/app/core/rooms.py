@@ -3,9 +3,11 @@ from collections import defaultdict
 from typing import Any
 
 from fastapi import WebSocket
-from fastapi.encoders import jsonable_encoder
+from pydantic import TypeAdapter
 
 MAX_CONNECTIONS_PER_LOT = 500
+
+message_adapter = TypeAdapter(dict[str, Any])
 
 
 class LotRooms:
@@ -30,7 +32,7 @@ class LotRooms:
         connections = list(self.rooms.get(lot_id, ()))
         if not connections:
             return
-        payload = jsonable_encoder(message)
+        payload = message_adapter.dump_python(message, mode="json")
         results = await asyncio.gather(
             *(connection.send_json(payload) for connection in connections),
             return_exceptions=True,

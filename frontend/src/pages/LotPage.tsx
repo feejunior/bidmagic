@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { BidPlaced, LotDetail, LotEvent, Wallet } from '../api/types'
 import { useAuth } from '../auth/useAuth'
+import { HoloCard } from '../components/HoloCard'
 import { StatusBadge } from '../components/StatusBadge'
 import { formatBRL, formatDateTime, parseBRL } from '../lib/format'
 import { currentStatus, formatRemaining, RARITY_LABELS } from '../lib/lots'
@@ -144,7 +145,7 @@ export function LotPage() {
   const status = currentStatus(lot.status, lot.starts_at, lot.ends_at, now)
   const remaining = Date.parse(lot.ends_at) - now
   const untilStart = Date.parse(lot.starts_at) - now
-  const extended = lot.ends_at !== lot.original_ends_at
+  const extended = Date.parse(lot.ends_at) !== Date.parse(lot.original_ends_at)
   const isLeader = !!user && lot.leader_alias === user.alias
   const wasOutbid = !!user && !isLeader && lot.recent_bids.some((bid) => bid.bidder_alias === user.alias)
   const settled = lot.status === 'closed'
@@ -157,7 +158,7 @@ export function LotPage() {
 
       <div className={styles.layout}>
         <div className={styles.imageCol}>
-          <img src={lot.card.image_url} alt={lot.card.name} className={styles.image} />
+          <HoloCard src={lot.card.image_url} alt={lot.card.name} rarity={lot.card.rarity} />
         </div>
 
         <div className={styles.infoCol}>

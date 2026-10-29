@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { LotList, LotSummary } from '../api/types'
 import { LotCard } from '../components/LotCard'
+import { SearchBox } from '../components/SearchBox'
 import { RARITY_LABELS } from '../lib/lots'
 import { useServerClock } from '../lib/useServerClock'
 import styles from './HomePage.module.css'
@@ -49,7 +50,7 @@ export function HomePage() {
         }
         setParams(next, { replace: true })
       }
-    }, 350)
+    }, 250)
     return () => window.clearTimeout(id)
   }, [search, query, params, setParams])
 
@@ -108,17 +109,9 @@ export function HomePage() {
         </div>
 
         <div className={styles.searchRow}>
-          <input
-            className="input"
-            type="search"
-            placeholder="Buscar carta pelo nome"
-            aria-label="Buscar carta pelo nome"
-            maxLength={100}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
+          <SearchBox value={search} onChange={setSearch} />
           <select
-            className={`input ${styles.select}`}
+            className="input"
             aria-label="Raridade"
             value={rarity}
             onChange={(event) => updateParam('rarity', event.target.value)}

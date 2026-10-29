@@ -20,16 +20,17 @@ export function LotCard({ lot, now }: { lot: LotSummary; now: number }) {
     <Link to={`/lotes/${lot.id}`} className={styles.card}>
       <div className={styles.imageWrap}>
         <img src={lot.card.image_url} alt={lot.card.name} loading="lazy" className={styles.image} />
-        <div className={styles.badge}>
-          <StatusBadge status={status} />
-        </div>
       </div>
 
       <div className={styles.body}>
+        <div className={styles.tags}>
+          <StatusBadge status={status} />
+          <span className={styles.rarity} data-rarity={lot.card.rarity}>
+            {RARITY_LABELS[lot.card.rarity] ?? lot.card.rarity}
+          </span>
+        </div>
         <h3 className={styles.name}>{lot.card.name}</h3>
-        <p className={styles.meta}>
-          {lot.card.set_name} · {RARITY_LABELS[lot.card.rarity] ?? lot.card.rarity}
-        </p>
+        <p className={styles.meta}>{lot.card.set_name}</p>
 
         <div className={styles.price}>
           <span className={styles.priceLabel}>
