@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from datetime import timedelta
 
 from sqlalchemy import select
@@ -17,6 +18,7 @@ from app.services.scryfall import get_or_create_card, search_cards
 from app.services.wallet import get_available
 
 PASSWORD = "bidmagic123"
+MIN_BIDDER_BALANCE = 300_000
 
 USERS = [
     ("Leiloeiro Demo", "leiloeiro@bidmagic.dev", "auctioneer", 0),
@@ -136,22 +138,52 @@ async def create_lot(
         session.add(append_bid(lot, bidder, amount, bid_time))
 
 
-async def seed() -> None:
+async def load_users(session: AsyncSession) -> dict[str, User]:
+    emails = [email for _, email, _, _ in USERS]
+    users = await session.scalars(select(User).where(User.email.in_(emails)))
+    loaded = {user.email.split("@")[0]: user for user in users}
+    if len(loaded) != len(USERS):
+        raise RuntimeError("Demo users are incomplete, reset the database instead.")
+    return loaded
+
+
+async def top_up_bidders(session: AsyncSession, users: dict[str, User]) -> None:
+    for user in users.values():
+        if user.role != "bidder":
+            continue
+        available = await get_available(session, user.id)
+        if available < MIN_BIDDER_BALANCE:
+            session.add(
+                LedgerEntry(
+                    user_id=user.id,
+                    type="deposit",
+                    amount=MIN_BIDDER_BALANCE - available,
+                )
+            )
+    await session.flush()
+
+
+async def seed(refresh_lots: bool) -> None:
     async with SessionLocal() as session:
         exists = await session.scalar(select(User.id).where(User.email == USERS[0][1]))
-        if exists:
-            print("Seed already applied, nothing to do.")
+        if exists and not refresh_lots:
+            print("Seed already applied. Use --refresh-lots to add new demo lots.")
             return
 
-        users = await create_users(session)
+        if exists:
+            users = await load_users(session)
+            await top_up_bidders(session, users)
+        else:
+            users = await create_users(session)
+
         for spec in LOTS:
             await create_lot(session, users["leiloeiro"], users, spec)
         await session.commit()
 
-    print("Seed applied.")
+    print("New demo lots created." if exists else "Seed applied.")
     for name, email, role, _ in USERS:
         print(f"  {role:<10} {email:<26} senha: {PASSWORD}")
 
 
 if __name__ == "__main__":
-    asyncio.run(seed())
+    asyncio.run(seed(refresh_lots="--refresh-lots" in sys.argv))
