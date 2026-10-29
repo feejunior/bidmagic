@@ -139,7 +139,22 @@
     display: none;
   }
 
+  .page {
+    display: block;
+  }
+
   .receipt {
+    max-width: none;
     box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .header {
+    background: none;
+  }
+
+  .hash a {
+    color: inherit;
+    text-decoration: none;
   }
 }

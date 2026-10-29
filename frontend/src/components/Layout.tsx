@@ -24,7 +24,7 @@ export function Layout() {
 
   return (
     <div className={styles.shell}>
-      <header className={styles.header}>
+      <header className={styles.header} data-no-print>
         <div className={styles.headerInner}>
           <Link to="/" className={styles.brand}>
             <span className={styles.brandMark}>✦</span> BidMagic

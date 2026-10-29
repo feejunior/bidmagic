@@ -190,3 +190,29 @@ select.input option {
 .muted {
   color: var(--text-muted);
 }
+
+@media print {
+  :root,
+  :root[data-theme='dark'],
+  :root:not([data-theme='light']) {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f3f3f3;
+    --border: #cfcfcf;
+    --text: #111111;
+    --text-muted: #555555;
+    --accent: #8f6516;
+    --accent-strong: #8f6516;
+    --shadow: none;
+
+    color-scheme: light;
+  }
+
+  [data-no-print] {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+}
