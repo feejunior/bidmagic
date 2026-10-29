@@ -2,18 +2,44 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, ApiError } from '../api/client'
 import type { Audit } from '../api/types'
+import { CopyIcon } from '../components/icons'
 import { StatusBadge } from '../components/StatusBadge'
-import { formatBRL, formatDateTime } from '../lib/format'
+import { usePageTitle } from '../lib/usePageTitle'
+import { formatBRL, formatDateTimeUTC } from '../lib/format'
 import styles from './AuditPage.module.css'
 
 function short(hash: string | null) {
   return hash ? `${hash.slice(0, 10)}…${hash.slice(-6)}` : '—'
 }
 
+function HashCell({ hash }: { hash: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(hash)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1500)
+    } catch {
+      window.prompt('Copie o hash:', hash)
+    }
+  }
+
+  return (
+    <span className={styles.hash}>
+      <code title={hash}>{short(hash)}</code>
+      <button type="button" className={styles.copy} onClick={copy} aria-label="Copiar hash completo">
+        {copied ? '✓' : <CopyIcon size={13} />}
+      </button>
+    </span>
+  )
+}
+
 export function AuditPage() {
   const lotId = Number(useParams().id)
   const [audit, setAudit] = useState<Audit | null>(null)
   const [error, setError] = useState('')
+  usePageTitle(audit ? `Auditoria · ${audit.card_name}` : 'Auditoria')
 
   useEffect(() => {
     api<Audit>(`/audit/lots/${lotId}`)
@@ -99,8 +125,8 @@ export function AuditPage() {
               <td>0</td>
               <td colSpan={3}>Início da corrente (gênesis)</td>
               <td>—</td>
-              <td title={audit.genesis_hash}>
-                <code>{short(audit.genesis_hash)}</code>
+              <td>
+                <HashCell hash={audit.genesis_hash} />
               </td>
               <td />
             </tr>
@@ -109,12 +135,12 @@ export function AuditPage() {
                 <td>{index + 1}</td>
                 <td>{bid.bidder_alias}</td>
                 <td>{formatBRL(bid.amount)}</td>
-                <td title={bid.created_at}>{formatDateTime(bid.created_at)}</td>
-                <td title={bid.prev_hash}>
-                  <code>{short(bid.prev_hash)}</code>
+                <td className="num" title={bid.created_at}>{formatDateTimeUTC(bid.created_at)}</td>
+                <td>
+                  <HashCell hash={bid.prev_hash} />
                 </td>
-                <td title={bid.hash}>
-                  <code>{short(bid.hash)}</code>
+                <td>
+                  <HashCell hash={bid.hash} />
                 </td>
                 <td>{bid.valid ? '✓ ok' : '✕ inválido'}</td>
               </tr>
@@ -124,8 +150,8 @@ export function AuditPage() {
       </div>
 
       <p className={styles.note}>
-        Os hashes são HMAC-SHA256 com uma chave secreta do servidor, então só o servidor consegue recalcular. Passe o
-        mouse sobre um hash para ver o valor completo.
+        Os hashes são HMAC-SHA256 com uma chave secreta do servidor, então só o servidor consegue recalcular. Toque no ícone ao
+        lado de um hash para copiar o valor completo.
       </p>
     </section>
   )

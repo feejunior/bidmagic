@@ -2,9 +2,12 @@ import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/useAuth'
+import { PasswordInput } from '../components/PasswordInput'
+import { usePageTitle } from '../lib/usePageTitle'
 import styles from './AuthForm.module.css'
 
 export function LoginPage() {
+  usePageTitle('Entrar')
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -49,10 +52,8 @@ export function LoginPage() {
           </div>
           <div className="field">
             <label htmlFor="password">Senha</label>
-            <input
+            <PasswordInput
               id="password"
-              className="input"
-              type="password"
               autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}

@@ -8,8 +8,10 @@ import { formatBRL } from '../lib/format'
 import { currentStatus, formatRemaining } from '../lib/lots'
 import { useServerClock } from '../lib/useServerClock'
 import styles from './MyBidsPage.module.css'
+import { usePageTitle } from '../lib/usePageTitle'
 
 export function MyBidsPage() {
+  usePageTitle('Meus lances')
   const [data, setData] = useState<MyBids | null>(null)
   const [error, setError] = useState('')
   const { now, sync } = useServerClock()

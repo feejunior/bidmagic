@@ -3,18 +3,20 @@ import type { LotEvent } from '../api/types'
 
 const RECONNECT_DELAY_MS = 2500
 
-export function useLotSocket(lotId: number, onEvent: (event: LotEvent) => void, onConnect: () => void) {
+export function useLotSocket(lotId: number | null, onEvent: (event: LotEvent) => void, onReconnect: () => void) {
   const [connected, setConnected] = useState(false)
-  const handlers = useRef({ onEvent, onConnect })
+  const handlers = useRef({ onEvent, onReconnect })
 
   useEffect(() => {
-    handlers.current = { onEvent, onConnect }
+    handlers.current = { onEvent, onReconnect }
   })
 
   useEffect(() => {
+    if (lotId === null) return
     let socket: WebSocket | null = null
     let retry: number | undefined
     let stopped = false
+    let opened = false
 
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
@@ -22,7 +24,8 @@ export function useLotSocket(lotId: number, onEvent: (event: LotEvent) => void, 
 
       socket.onopen = () => {
         setConnected(true)
-        handlers.current.onConnect()
+        if (opened) handlers.current.onReconnect()
+        opened = true
       }
       socket.onmessage = (message) => {
         try {
