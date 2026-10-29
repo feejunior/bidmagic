@@ -90,3 +90,18 @@ export type Wallet = {
     created_at: string
   }[]
 }
+
+export type MyLots = {
+  server_now: string
+  total_received: number
+  lots: LotSummary[]
+}
+
+export type CardSearchResult = {
+  scryfall_id: string
+  name: string
+  set_name: string
+  rarity: string
+  type_line: string | null
+  image_url: string
+}
