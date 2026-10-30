@@ -57,8 +57,8 @@ LOTS = [
         "description": "Começa em breve.",
         "starting_bid": 800,
         "min_increment": 100,
-        "starts_in": timedelta(days=1),
-        "duration": timedelta(days=5),
+        "starts_in": timedelta(days=5),
+        "duration": timedelta(days=2),
         "bids": [],
     },
     {
